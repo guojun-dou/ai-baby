@@ -1,5 +1,5 @@
 {
-  "name": "goods",
+  "name": "orders",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "AI-Baby 订单：创建、列表、更新状态",
   "dependencies": {
     "wx-server-sdk": "^3.0.4"
   }

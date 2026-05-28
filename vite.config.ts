@@ -1,24 +1,35 @@
 import { fileURLToPath, URL } from 'node:url'
 
-import { defineConfig } from 'vite'
-import Components from '@uni-helper/vite-plugin-uni-components'
-import UniPages from '@uni-helper/vite-plugin-uni-pages'
-import UniManifest from '@uni-helper/vite-plugin-uni-manifest'
-import UniPlatform from '@uni-helper/vite-plugin-uni-platform'
 import ComponentPlaceholder from '@binbinji/vite-plugin-component-placeholder'
 import Uni from '@uni-helper/plugin-uni'
+import Components from '@uni-helper/vite-plugin-uni-components'
+import UniManifest from '@uni-helper/vite-plugin-uni-manifest'
+import UniPages from '@uni-helper/vite-plugin-uni-pages'
+import UniPlatform from '@uni-helper/vite-plugin-uni-platform'
+import { defineConfig } from 'vite'
 
 export default defineConfig({
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        additionalData: `
+          @import "@/styles/variables.scss";
+          @import "@/styles/mixins.scss";
+          @import "@/styles/icons.scss";
+        `,
+      },
+    },
   },
   plugins: [
     // https://uni-helper.js.org/vite-plugin-uni-components
     Components({
       dts: true,
-      resolvers: []
+      resolvers: [],
     }),
     // https://uni-helper.js.org/vite-plugin-uni-pages
     UniPages(),
@@ -32,14 +43,10 @@ export default defineConfig({
     Uni(),
   ],
   build: {
-    target: "es6",
-    cssTarget: "chrome61"
+    target: 'es6',
+    cssTarget: 'chrome61',
   },
   optimizeDeps: {
-    exclude: [
-      "vue-demi"
-    ]
-  }  
+    exclude: ['vue-demi'],
+  },
 })
-
-

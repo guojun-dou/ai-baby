@@ -9,7 +9,9 @@
     "about": "unh info",
     "type-check": "vue-tsc --noEmit",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "icons:tab": "node scripts/generate-tab-icons.mjs"
   },
   "dependencies": {
     "@dcloudio/uni-app": "3.0.0-5000720260410001",
@@ -55,7 +57,9 @@
     "@vue/runtime-core": "3.4.21",
     "@vue/tsconfig": "^0.9.1",
     "eslint": "^10.2.1",
+    "eslint-config-prettier": "^10.1.8",
     "miniprogram-api-typings": "^5.1.2",
+    "prettier": "^3.8.3",
     "sass": "1.64.2",
     "typescript": "5.9.3",
     "vite": "5.2.8",

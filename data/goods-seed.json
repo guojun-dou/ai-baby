@@ -1,0 +1,546 @@
+
+  {
+    "title": "有机高铁米粉 原味",
+    "desc": "二价铁易吸收，粉质细腻，适合初次添加辅食。",
+    "price": 39.9,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["有机", "高铁", "初尝辅食"],
+    "age": "6月+",
+    "nutrition": "强化钙铁锌；低钠配方；多种维生素 B 族。",
+    "ingredients": "有机大米、二价铁、葡萄糖酸锌、碳酸钙、维生素 B1。",
+    "stock": 220,
+    "createTime": "2026-01-08T06:00:00.000Z",
+    "storage": "阴凉干燥密封；开封后 30 天内食用。"
+  }
+  {
+    "title": "胡萝卜南瓜泥",
+    "desc": "果蔬泥无添加盐糖，开袋即食。",
+    "price": 12.8,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["果蔬", "无添加"],
+    "age": "7月+",
+    "nutrition": "β-胡萝卜素与膳食纤维；质地细腻易吞咽。",
+    "ingredients": "胡萝卜、南瓜、水。",
+    "stock": 180,
+    "createTime": "2026-01-09T06:00:00.000Z"
+  }
+  {
+    "title": "婴儿营养短面 钙铁锌",
+    "desc": "短面易煮软，钙铁锌强化。",
+    "price": 28,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["钙铁锌", "短面"],
+    "age": "8月+",
+    "nutrition": "钙铁锌强化；煮后柔软好嚼。",
+    "ingredients": "小麦粉、碳酸钙、焦磷酸铁、葡萄糖酸锌。",
+    "stock": 150,
+    "createTime": "2026-01-10T06:00:00.000Z"
+  }
+  {
+    "title": "西梅苹果泥",
+    "desc": "酸甜适口，膳食纤维友好。",
+    "price": 15.5,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["膳食纤维", "开味"],
+    "age": "6月+",
+    "nutrition": "含天然果酸与膳食纤维，助力肠道蠕动。",
+    "ingredients": "苹果、西梅泥。",
+    "stock": 200,
+    "createTime": "2026-01-11T06:00:00.000Z"
+  }
+  {
+    "title": "鳕鱼藜麦粥",
+    "desc": "深海鳕鱼与藜麦，营养均衡一餐。",
+    "price": 32,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["高蛋白", "DHA"],
+    "age": "9月+",
+    "nutrition": "优质蛋白与 Omega-3；藜麦提供多种氨基酸。",
+    "ingredients": "大米、鳕鱼、藜麦、胡萝卜、玉米淀粉。",
+    "stock": 95,
+    "createTime": "2026-01-12T06:00:00.000Z"
+  }
+  {
+    "title": "菠菜蛋黄泥",
+    "desc": "铁与卵磷脂搭配，细腻泥糊。",
+    "price": 14.2,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["高铁", "蛋黄"],
+    "age": "7月+",
+    "nutrition": "铁与胆碱来源；适合与米粉混合喂养。",
+    "ingredients": "菠菜、蛋黄、水。",
+    "stock": 160,
+    "createTime": "2026-01-13T06:00:00.000Z"
+  }
+  {
+    "title": "小米南瓜粥",
+    "desc": "温和养胃，小颗粒好吞咽。",
+    "price": 18.9,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["温和", "谷物"],
+    "age": "6月+",
+    "nutrition": "小米易消化；南瓜天然甜味。",
+    "ingredients": "小米、南瓜、水。",
+    "stock": 210,
+    "createTime": "2026-01-14T06:00:00.000Z"
+  }
+  {
+    "title": "牛油果香蕉泥",
+    "desc": "顺滑奶香口感，不饱和脂肪酸。",
+    "price": 16.8,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["不饱和脂肪酸", "顺滑"],
+    "age": "7月+",
+    "nutrition": "单不饱和脂肪酸；钾与叶酸来源。",
+    "ingredients": "牛油果、香蕉、柠檬汁（微量）。",
+    "stock": 140,
+    "createTime": "2026-01-15T06:00:00.000Z"
+  }
+  {
+    "title": "鸡肉蔬菜泥",
+    "desc": "鸡肉泥搭配多种蔬菜。",
+    "price": 19.9,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["高蛋白", "混合泥"],
+    "age": "8月+",
+    "nutrition": "动物蛋白与维生素协同；质地适中。",
+    "ingredients": "鸡胸肉、胡萝卜、豌豆、土豆、水。",
+    "stock": 130,
+    "createTime": "2026-01-16T06:00:00.000Z"
+  }
+  {
+    "title": "蓝莓燕麦糊",
+    "desc": "燕麦与蓝莓，花青素与膳食纤维。",
+    "price": 22.5,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["花青素", "燕麦"],
+    "age": "8月+",
+    "nutrition": "可溶性膳食纤维；花青素抗氧化。",
+    "ingredients": "燕麦粉、蓝莓、苹果、水。",
+    "stock": 115,
+    "createTime": "2026-01-17T06:00:00.000Z"
+  }
+  {
+    "title": "三文鱼土豆泥",
+    "desc": "三文鱼与土豆，绵密口感。",
+    "price": 26,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["DHA", "深海鱼"],
+    "age": "9月+",
+    "nutrition": "DHA 与优质蛋白；土豆提供碳水化合物。",
+    "ingredients": "三文鱼、土豆、柠檬、水。",
+    "stock": 88,
+    "createTime": "2026-01-18T06:00:00.000Z"
+  }
+  {
+    "title": "红枣山药泥",
+    "desc": "自然甜味，山药绵软。",
+    "price": 13.6,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["无添加糖", "山药"],
+    "age": "7月+",
+    "nutrition": "山药黏液蛋白；红枣提供天然风味。",
+    "ingredients": "铁棍山药、红枣、水。",
+    "stock": 175,
+    "createTime": "2026-01-19T06:00:00.000Z"
+  }
+  {
+    "title": "奶酪星星面",
+    "desc": "星星造型趣味进食，奶酪增香。",
+    "price": 31.8,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["趣味造型", "钙"],
+    "age": "10月+",
+    "nutrition": "钙与蛋白质；造型锻炼自主进食。",
+    "ingredients": "小麦粉、再制干酪、全脂乳粉。",
+    "stock": 120,
+    "createTime": "2026-01-20T06:00:00.000Z"
+  }
+  {
+    "title": "豌豆泥",
+    "desc": "植物蛋白与叶酸，绿色泥糊。",
+    "price": 11.9,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["植物蛋白", "绿色蔬菜"],
+    "age": "7月+",
+    "nutrition": "叶酸与膳食纤维；低敏配方思路。",
+    "ingredients": "豌豆、水。",
+    "stock": 190,
+    "createTime": "2026-01-21T06:00:00.000Z"
+  }
+  {
+    "title": "牛肉番茄泥",
+    "desc": "红肉补铁，番茄提鲜。",
+    "price": 21.5,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["补铁", "红肉"],
+    "age": "8月+",
+    "nutrition": "血红素铁来源；番茄红素。",
+    "ingredients": "瘦牛肉、番茄、洋葱、水。",
+    "stock": 102,
+    "createTime": "2026-01-22T06:00:00.000Z"
+  }
+  {
+    "title": "椰香米糊",
+    "desc": "椰浆与大米，温和椰香。",
+    "price": 17.3,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["低敏", "米糊"],
+    "age": "6月+",
+    "nutrition": "碳水化合物为主；首次尝试椰香宜少量。",
+    "ingredients": "大米、椰浆、水。",
+    "stock": 155,
+    "createTime": "2026-01-23T06:00:00.000Z"
+  }
+  {
+    "title": "黑芝麻核桃粉",
+    "desc": "拌入米糊，钙与不饱和脂肪酸。",
+    "price": 45,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["拌饭料", "坚果香"],
+    "age": "8月+",
+    "nutrition": "钙、铁、锌与多不饱和脂肪酸（适量添加）。",
+    "ingredients": "黑芝麻、核桃仁、大米粉。",
+    "stock": 80,
+    "createTime": "2026-01-24T06:00:00.000Z"
+  }
+  {
+    "title": "酸奶溶豆 草莓味",
+    "desc": "入口即化，手指食物练习。",
+    "price": 29.9,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["手指食物", "溶豆"],
+    "age": "10月+",
+    "nutrition": "活性乳酸菌（以产品标注为准）；易抓取。",
+    "ingredients": "发酵乳、全脂乳粉、草莓粉、淀粉。",
+    "stock": 165,
+    "createTime": "2026-01-25T06:00:00.000Z"
+  }
+  {
+    "title": "海苔芝麻拌饭料",
+    "desc": "少盐配方，拌粥拌面。",
+    "price": 24.8,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["拌饭", "碘"],
+    "age": "12月+",
+    "nutrition": "碘与矿物质；注意每日钠摄入总量。",
+    "ingredients": "海苔、芝麻、食用盐（低量）。",
+    "stock": 200,
+    "createTime": "2026-01-26T06:00:00.000Z"
+  }
+  {
+    "title": "糙米米乳",
+    "desc": "糙米与大米混合，谷物香气。",
+    "price": 20.1,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["全谷物", "米乳"],
+    "age": "6月+",
+    "nutrition": "更多膳食纤维与 B 族维生素。",
+    "ingredients": "糙米、大米、麦芽糊精。",
+    "stock": 145,
+    "createTime": "2026-01-27T06:00:00.000Z"
+  }
+  {
+    "title": "冬瓜排骨粥（即食）",
+    "desc": "清淡粥品，开盖加热即食。",
+    "price": 27.6,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["即食粥", "清淡"],
+    "age": "10月+",
+    "nutrition": "胶原蛋白与矿物质溶出；少油少盐工艺。",
+    "ingredients": "大米、冬瓜、猪排骨、水、姜。",
+    "stock": 70,
+    "createTime": "2026-01-28T06:00:00.000Z"
+  }
+  {
+    "title": "苹果米饼",
+    "desc": "松脆米饼，苹果清香。",
+    "price": 19,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["零食", "米饼"],
+    "age": "8月+",
+    "nutrition": "练习咀嚼与抓握；控制单次摄入量。",
+    "ingredients": "大米、苹果汁、淀粉。",
+    "stock": 230,
+    "createTime": "2026-01-29T06:00:00.000Z"
+  }
+  {
+    "title": "紫薯泥",
+    "desc": "花青素紫色泥，自然甜味。",
+    "price": 12.5,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["花青素", "根茎"],
+    "age": "7月+",
+    "nutrition": "花青素与膳食纤维；色泽吸引进食兴趣。",
+    "ingredients": "紫薯、水。",
+    "stock": 188,
+    "createTime": "2026-01-30T06:00:00.000Z"
+  }
+  {
+    "title": "豆腐蔬菜泥",
+    "desc": "植物蛋白豆腐，搭配青菜。",
+    "price": 14.9,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["植物蛋白", "豆腐"],
+    "age": "8月+",
+    "nutrition": "大豆蛋白与钙；蔬菜补充维生素。",
+    "ingredients": "嫩豆腐、小白菜、胡萝卜、水。",
+    "stock": 134,
+    "createTime": "2026-02-01T06:00:00.000Z"
+  }
+  {
+    "title": "虾仁西兰花泥",
+    "desc": "虾仁与西兰花，鲜咸清淡。",
+    "price": 29,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["海鲜", "锌"],
+    "age": "9月+",
+    "nutrition": "锌与优质蛋白；首次海鲜需观察过敏。",
+    "ingredients": "虾仁、西兰花、水。",
+    "stock": 76,
+    "createTime": "2026-02-02T06:00:00.000Z"
+  }
+  {
+    "title": "燕麦香蕉粥",
+    "desc": "即冲燕麦粥，香蕉风味。",
+    "price": 23.2,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["即冲", "燕麦"],
+    "age": "8月+",
+    "nutrition": "β-葡聚糖；饱腹感适中。",
+    "ingredients": "燕麦片、香蕉粉、全脂乳粉、糖（低量）。",
+    "stock": 142,
+    "createTime": "2026-02-03T06:00:00.000Z"
+  }
+  {
+    "title": "奶酪小泡芙",
+    "desc": "空心小泡芙，奶酪味。",
+    "price": 26.8,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["零食", "奶酪"],
+    "age": "10月+",
+    "nutrition": "钙与能量密度较高；两餐间少量。",
+    "ingredients": "大米粉、再制干酪、植物油。",
+    "stock": 198,
+    "createTime": "2026-02-04T06:00:00.000Z"
+  }
+  {
+    "title": "混合蔬菜泥（瓶装）",
+    "desc": "多种蔬菜混合，一瓶一餐。",
+    "price": 16.5,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["混合蔬菜", "瓶装"],
+    "age": "7月+",
+    "nutrition": "多种维生素与矿物质；开盖后冷藏尽快食用。",
+    "ingredients": "胡萝卜、西葫芦、豌豆、水。",
+    "stock": 220,
+    "createTime": "2026-02-05T06:00:00.000Z"
+  }
+  {
+    "title": "羊奶粉试用装（辅食调味）",
+    "desc": "少量添加增香，非主粮替代。",
+    "price": 9.9,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["试用装", "调味"],
+    "age": "12月+",
+    "nutrition": "乳蛋白与钙；乳糖不耐受慎用。",
+    "ingredients": "全脂羊乳粉。",
+    "stock": 300,
+    "createTime": "2026-02-06T06:00:00.000Z"
+  }
+  {
+    "title": "无盐海苔脆片",
+    "desc": "薄脆海苔，低钠配方。",
+    "price": 18.8,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["低钠", "零食"],
+    "age": "12月+",
+    "nutrition": "碘来源；注意与其他含碘食物总量。",
+    "ingredients": "干紫菜、植物油。",
+    "stock": 250,
+    "createTime": "2026-02-07T06:00:00.000Z"
+  }
+  {
+    "title": "玉米鸡肉肠（儿童）",
+    "desc": "小根装，玉米颗粒与鸡肉。",
+    "price": 34.5,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["便携", "高蛋白"],
+    "age": "12月+",
+    "nutrition": "蛋白质与能量；加工肉制品适量。",
+    "ingredients": "鸡肉、玉米、淀粉、食用盐。",
+    "stock": 90,
+    "createTime": "2026-02-08T06:00:00.000Z"
+  }
+  {
+    "title": "冻干草莓脆",
+    "desc": "冻干工艺，保留果香。",
+    "price": 27.9,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["冻干", "水果"],
+    "age": "10月+",
+    "nutrition": "维生素 C；质地松脆注意呛咳风险。",
+    "ingredients": "草莓。",
+    "stock": 110,
+    "createTime": "2026-02-09T06:00:00.000Z"
+  }
+  {
+    "title": "藜麦多谷物粉",
+    "desc": "多种谷物磨粉，冲调米糊。",
+    "price": 36,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["多谷物", "藜麦"],
+    "age": "6月+",
+    "nutrition": "多种氨基酸与膳食纤维；由稀到稠逐步添加。",
+    "ingredients": "大米、藜麦、小米、燕麦。",
+    "stock": 125,
+    "createTime": "2026-02-10T06:00:00.000Z"
+  }
+  {
+    "title": "莲藕雪梨泥",
+    "desc": "润燥清甜，细腻泥状。",
+    "price": 13.2,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["润燥", "果蔬"],
+    "age": "7月+",
+    "nutrition": "水分与钾；适合干燥季节搭配。",
+    "ingredients": "莲藕、雪梨、水。",
+    "stock": 170,
+    "createTime": "2026-02-11T06:00:00.000Z"
+  }
+  {
+    "title": "香菇鸡肉粥",
+    "desc": "香菇提鲜，鸡肉茸粥。",
+    "price": 25.5,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["菌菇", "粥品"],
+    "age": "10月+",
+    "nutrition": "菌菇多糖与鲜味氨基酸；鸡肉补充蛋白。",
+    "ingredients": "大米、鸡胸肉、香菇、水。",
+    "stock": 99,
+    "createTime": "2026-02-12T06:00:00.000Z"
+  }
+  {
+    "title": "全阶段营养米粉（混合谷物）",
+    "desc": "多种谷物混合，全阶段标注以包装为准。",
+    "price": 42,
+    "cover": "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+    "images": [
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg",
+      "cloud://cloud1-d0g6voe3bcd13bad7.636c-cloud1-d0g6voe3bcd13bad7-1430113086/mmexport1778662497657.jpg"
+    ],
+    "tags": ["混合谷物", "热销"],
+    "age": "全阶段",
+    "nutrition": "复合碳水化合物与强化维生素矿物质（见包装营养成分表）。",
+    "ingredients": "大米、燕麦、大麦、维生素与矿物质预混料。",
+    "stock": 260,
+    "createTime": "2026-02-13T06:00:00.000Z",
+    "storage": "密封防潮；开封后尽快食用。"
+  }

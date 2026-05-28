@@ -1,0 +1,76 @@
+---
+description: pinia store rules
+globs:
+  - 'stores/**/*.ts'
+alwaysApply: false
+---
+
+你正在开发 Pinia 状态管理。
+
+技术要求：
+
+- Pinia
+- TypeScript
+- composition api
+- uni-app兼容
+
+Store规范：
+
+- 使用 defineStore
+- 使用 setup 风格
+- 使用 ref/computed
+- 使用 uni.setStorageSync 持久化
+- 使用 uni.getStorageSync 读取缓存
+
+禁止：
+
+- 不要使用 Vuex
+- 不要使用 localStorage
+- 不要使用 Redux
+- 不要使用 class 风格
+
+购物车 Store：
+
+必须包含：
+
+- cartList
+- addCart
+- removeCart
+- clearCart
+- changeCount
+- totalPrice
+- totalCount
+
+用户 Store：
+
+必须包含：
+
+- userInfo
+- token
+- login
+- logout
+
+代码要求：
+
+- 输出完整 store
+- 包含 TypeScript 类型
+- 包含持久化逻辑
+- 代码可直接运行
+
+数据结构要求：
+
+购物车商品：
+
+{
+\_id,
+title,
+price,
+cover,
+count
+}
+
+保持：
+
+- Store 简洁
+- 方法清晰
+- 避免过度抽象

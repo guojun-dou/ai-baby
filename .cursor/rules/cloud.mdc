@@ -1,0 +1,94 @@
+---
+description: cloud function rules
+globs:
+  - 'cloudfunctions/**/*.js'
+alwaysApply: false
+---
+
+你正在开发微信云开发云函数。
+
+技术栈：
+
+- 微信云开发
+- wx-server-sdk
+- MongoDB
+- Node.js
+
+云函数规范：
+
+- 使用 async/await
+- 包含 try/catch
+- 包含错误处理
+- 包含参数校验
+- 返回统一数据结构
+
+统一返回格式：
+
+成功：
+
+{
+code: 0,
+data,
+message: 'success'
+}
+
+失败：
+
+{
+code: -1,
+message: '错误信息'
+}
+
+数据库规范：
+
+- 使用云数据库
+- 使用 collection
+- 使用 add/get/update/remove
+- 使用 createTime 字段
+- 使用 updateTime 字段
+
+禁止：
+
+- 不要生成 SQL
+- 不要使用 MySQL
+- 不要使用 Express
+- 不要生成 Web API
+- 不要生成 Koa
+
+代码要求：
+
+- 输出完整 index.js
+- 代码可直接部署
+- 包含 cloud.init
+- 包含 env 配置
+
+订单状态：
+
+- pending
+- delivering
+- finished
+
+商品字段：
+
+- title
+- desc
+- price
+- cover
+- images
+- tags
+- stock
+
+订单字段：
+
+- goodsList
+- totalPrice
+- address
+- phone
+- username
+- status
+
+要求：
+
+- 优先使用 TypeScript 风格结构
+- 保持代码清晰
+- 保持函数简单

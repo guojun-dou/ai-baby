@@ -1,0 +1,248 @@
+---
+description: frontend rules for uni-app mini program
+globs:
+  - 'pages/**/*.vue'
+  - 'components/**/*.vue'
+alwaysApply: false
+---
+
+你正在开发一个 uni-app 微信小程序项目。
+
+项目名称：
+AI-Baby
+
+技术栈：
+
+- uni-app
+- Vue3 script setup
+- TypeScript
+- Pinia
+- SCSS
+- 微信云开发
+- 微信小程序兼容
+
+代码要求：
+
+- 必须兼容 uni-app
+- 必须兼容微信小程序
+- 使用 Vue3 composition api
+- 使用 script setup
+- 使用 TypeScript
+- 使用 SCSS
+- 使用 flex 布局
+- 优先使用 rpx
+- 边框可使用 px
+- 优先移动端布局
+
+禁止：
+
+- 不要使用 document
+- 不要使用 window
+- 不要使用 localStorage
+- 不要使用 DOM API
+- 不要生成 React 写法
+- 不要使用 web-only API
+- 不要生成复杂动画
+- 不要过度封装
+
+页面规范：
+
+- 页面根节点使用 .page
+- 页面统一 padding
+- 卡片式布局
+- 保持页面风格统一
+
+uni-app API：
+
+- 使用 uni.navigateTo
+- 使用 uni.switchTab
+- 使用 uni.showToast
+- 使用 uni.showLoading
+- 使用 uni.hideLoading
+- 使用 uni.request
+- 使用 uni.setStorageSync
+- 使用 uni.getStorageSync
+
+代码输出要求：
+
+- 优先输出完整代码
+- 不要省略 template
+- 不要省略 script
+- 不要省略 style
+- 使用 mock 数据兜底
+- 保证代码可直接运行
+
+## 目录结构规范
+
+### Pages
+
+所有 pages 页面必须使用文件夹结构。
+
+正确示例：
+
+```text
+pages/
+  index/
+    index.vue
+
+  goods-detail/
+    index.vue
+
+  cart/
+    index.vue
+
+  order-confirm/
+    index.vue
+
+  order-list/
+    index.vue
+
+  my/
+    index.vue
+
+  address/
+    index.vue
+```
+
+禁止：
+
+```text
+pages/index.vue
+pages/cart.vue
+```
+
+规则：
+
+- 一个页面对应一个文件夹
+- 页面文件统一命名为 index.vue
+- 页面相关组件可放在页面目录内部
+- 生成页面时同步更新 pages.json
+
+---
+
+### Components
+
+组件目录规范：
+
+```text
+components/
+  GoodsCard/
+    index.vue
+
+  SubmitBar/
+    index.vue
+
+  EmptyState/
+    index.vue
+```
+
+规则：
+
+- 一个组件一个文件夹
+- 组件入口统一为 index.vue
+- 组件名称使用 PascalCase
+
+---
+
+### Stores
+
+Store 目录规范：
+
+```text
+stores/
+  cart.ts
+  user.ts
+```
+
+规则：
+
+- 使用 Pinia
+- 使用 composition api
+- 使用 TypeScript
+
+---
+
+### Cloud Functions
+
+云函数目录规范：
+
+```text
+cloudfunctions/
+  goods/
+    index.js
+
+  order/
+    index.js
+```
+
+规则：
+
+- 一个云函数一个目录
+- 必须包含 index.js
+- 使用 wx-server-sdk
+
+---
+
+生成代码前：
+
+- 先确认文件应该创建的位置
+- 不要生成错误路径
+- 不要生成重复目录
+
+### 项目引用规则
+
+禁止：
+
+- 引用不存在的 utils
+- 引用不存在的 api
+- 引用不存在的 hooks
+- 引用不存在的 services
+
+生成代码前：
+
+- 先确认项目内是否已有对应文件
+- 如果不存在，则同时生成
+- 不要生成虚假 import
+
+### UI库限制
+
+禁止：
+
+- Element Plus
+- Ant Design Vue
+- Vuetify
+- Naive UI
+
+优先：
+
+- 原生 uni-app 组件
+- 自定义轻量组件
+
+### 组件拆分规则
+
+当页面出现以下情况时：
+
+- 商品卡片重复
+- 底部操作栏重复
+- 空状态重复
+
+应优先拆分为 components 组件。
+
+避免：
+
+- 单文件过大
+- 重复 UI
+- 重复逻辑
+
+### TypeScript 规范
+
+禁止：
+
+- 使用 any
+- 使用未定义类型
+
+要求：
+
+- 定义 interface/type
+- Props 必须声明类型
+- Store state 必须声明类型

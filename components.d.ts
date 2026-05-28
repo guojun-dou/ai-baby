@@ -9,6 +9,9 @@ declare module 'vue' {
   export interface GlobalComponents {
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
     AppLogos: typeof import('./src/components/AppLogos.vue')['default']
+    EmptyState: typeof import('./src/components/EmptyState.vue')['default']
+    GoodsCard: typeof import('./src/components/GoodsCard.vue')['default']
     InputEntry: typeof import('./src/components/InputEntry.vue')['default']
+    SubmitBar: typeof import('./src/components/SubmitBar.vue')['default']
   }
 }

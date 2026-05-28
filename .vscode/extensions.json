@@ -1,5 +1,6 @@
 {
   "recommendations": [
+    "esbenp.prettier-vscode",
     "vue.volar",
     "mrmaoddxxaa.create-uniapp-view",
     "uni-helper.uni-helper-vscode",

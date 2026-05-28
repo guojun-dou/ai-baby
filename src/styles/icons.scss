@@ -1,0 +1,49 @@
+/**
+ * 页面内图标尺寸（与 PROMPTS 图标系统一致，单位 rpx）
+ * TabBar 使用 static/tab 下 PNG，不在此定义尺寸。
+ */
+$icon-size-sm: 32rpx;
+$icon-size-md: 40rpx;
+$icon-size-lg: 48rpx;
+$icon-size-xl: 56rpx;
+
+$icon-color-muted: $text-secondary;
+$icon-color-default: $text-color;
+$icon-color-primary: $primary-color;
+
+@mixin icon-text-row($gap: 12rpx) {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $gap;
+}
+
+@mixin icon-text-column($gap: 8rpx) {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $gap;
+}
+
+/** 图标 + 文案（列表行、按钮） */
+.icon-text {
+  @include icon-text-row(12rpx);
+}
+
+.icon-text--tight {
+  @include icon-text-row(8rpx);
+}
+
+/** 与 uni-icons 默认字号对齐：20px ≈ 40rpx（设计稿 750 基准） */
+.icon-text__icon {
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.icon-text__label {
+  flex: 1;
+  min-width: 0;
+  font-size: 28rpx;
+  color: $text-color;
+  line-height: 1.4;
+}

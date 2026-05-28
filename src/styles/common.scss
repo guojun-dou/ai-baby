@@ -1,0 +1,26 @@
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  background: $card-bg;
+  border-radius: $radius-md;
+  box-shadow: $shadow;
+}
+
+/* --status-bar-height 由 layout store 写入各页根节点 .page 的 :style（见 stores/layout.ts） */
+.page {
+  min-height: 100vh;
+  background: $page-bg;
+  padding-top: calc(var(--status-bar-height, 0px) + 60rpx);
+  padding-left: $page-padding;
+  padding-right: $page-padding;
+  padding-bottom: calc($page-padding + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
