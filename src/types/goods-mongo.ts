@@ -53,6 +53,21 @@ export interface GoodMongoDocument {
   /** 库存（件） */
   stock: number
 
+  /** 1 上架 / 0 下架 */
+  status?: number
+
+  /** 排序权重 */
+  sort?: number
+
+  /** 软删除 */
+  deleted?: boolean
+
+  /** 销量 */
+  sales?: number
+
+  /** 更新时间 */
+  updateTime?: Date | string
+
   /** 创建时间 */
   createTime: Date | string
 

@@ -93,6 +93,17 @@
       "type": "page",
       "style": {
         "navigationBarTitleText": "商品管理",
+        "backgroundColor": "#fff7f9",
+        "enablePullDownRefresh": true
+      }
+    },
+    // #endif
+    // #ifdef MP-WEIXIN
+    {
+      "path": "pages/admin/goods-edit/index",
+      "type": "page",
+      "style": {
+        "navigationBarTitleText": "编辑商品",
         "backgroundColor": "#fff7f9"
       }
     },

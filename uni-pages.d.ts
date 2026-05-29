@@ -12,6 +12,7 @@ type _LocationUrl =
   "/pages/order/confirm" |
   "/pages/order/list" |
   "/pages/admin/goods/index" |
+  "/pages/admin/goods-edit/index" |
   "/pages/admin/index/index" |
   "/pages/admin/order/index";
 
