@@ -89,13 +89,34 @@
     },
     // #ifdef MP-WEIXIN
     {
+      "path": "pages/admin/goods/index",
+      "type": "page",
+      "style": {
+        "navigationBarTitleText": "商品管理",
+        "backgroundColor": "#fff7f9"
+      }
+    },
+    // #endif
+    // #ifdef MP-WEIXIN
+    {
       "path": "pages/admin/index/index",
       "type": "page",
       "style": {
         "navigationBarTitleText": "管理后台",
         "navigationBarBackgroundColor": "#ffffff",
         "navigationBarTextStyle": "black",
-        "backgroundColor": "#f8f8f8"
+        "backgroundColor": "#fff7f9",
+        "enablePullDownRefresh": true
+      }
+    },
+    // #endif
+    // #ifdef MP-WEIXIN
+    {
+      "path": "pages/admin/order/index",
+      "type": "page",
+      "style": {
+        "navigationBarTitleText": "订单管理",
+        "backgroundColor": "#fff7f9"
       }
     }
     // #endif
