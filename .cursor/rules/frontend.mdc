@@ -45,14 +45,38 @@ AI-Baby
 - 不要生成复杂动画
 - 不要过度封装
 
-页面规范：
+## 页面规范：
 
 - 页面根节点使用 .page
 - 页面统一 padding
 - 卡片式布局
 - 保持页面风格统一
 
-uni-app API：
+---
+
+## 管理端页面规范
+
+管理端页面统一放：
+
+pages/admin/
+
+页面命名：
+
+- 列表页：xxx/index
+- 编辑页：xxx-edit/index
+- 详情页：xxx-detail/index
+
+列表要求：
+
+- 分页
+- 每页默认10条
+- 支持下拉加载更多
+
+管理端保持移动端布局。
+
+---
+
+## uni-app API：
 
 - 使用 uni.navigateTo
 - 使用 uni.switchTab
@@ -63,7 +87,9 @@ uni-app API：
 - 使用 uni.setStorageSync
 - 使用 uni.getStorageSync
 
-代码输出要求：
+---
+
+## 代码输出要求：
 
 - 优先输出完整代码
 - 不要省略 template
@@ -71,6 +97,8 @@ uni-app API：
 - 不要省略 style
 - 使用 mock 数据兜底
 - 保证代码可直接运行
+
+---
 
 ## 目录结构规范
 

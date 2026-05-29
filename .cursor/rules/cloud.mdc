@@ -7,14 +7,16 @@ alwaysApply: false
 
 你正在开发微信云开发云函数。
 
-技术栈：
+## 技术栈：
 
 - 微信云开发
 - wx-server-sdk
 - MongoDB
 - Node.js
 
-云函数规范：
+---
+
+## 云函数规范：
 
 - 使用 async/await
 - 包含 try/catch
@@ -39,7 +41,29 @@ code: -1,
 message: '错误信息'
 }
 
-数据库规范：
+---
+
+## 云开发规范
+
+- 禁止前端直接操作数据库
+- 所有数据库操作必须通过云函数
+- 使用 async/await
+- 返回统一结构
+
+时间字段：
+
+- createTime
+- updateTime
+
+上传规范：
+
+- 保存 cloud fileID
+- 禁止 tempFilePath
+- 禁止 base64
+
+---
+
+## 数据库规范：
 
 - 使用云数据库
 - 使用 collection
@@ -55,7 +79,9 @@ message: '错误信息'
 - 不要生成 Web API
 - 不要生成 Koa
 
-代码要求：
+---
+
+## 代码要求：
 
 - 输出完整 index.js
 - 代码可直接部署
@@ -87,7 +113,9 @@ message: '错误信息'
 - username
 - status
 
-要求：
+---
+
+## 要求：
 
 - 优先使用 TypeScript 风格结构
 - 保持代码清晰

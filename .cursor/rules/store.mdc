@@ -2,10 +2,11 @@
 description: pinia store rules
 globs:
   - 'stores/**/*.ts'
+  - 'api/*.ts'
 alwaysApply: false
 ---
 
-你正在开发 Pinia 状态管理。
+你正在开发 Pinia 状态管理和 composition api 封装。
 
 技术要求：
 
@@ -14,13 +15,31 @@ alwaysApply: false
 - composition api
 - uni-app兼容
 
-Store规范：
+## API规范
+
+页面禁止直接调用云函数。
+
+统一：
+
+- api/
+  - goods.ts
+  - order.ts
+  - admin.ts
+
+页面仅调用 api 层。
+
+---
+
+## Store规范
 
 - 使用 defineStore
 - 使用 setup 风格
 - 使用 ref/computed
 - 使用 uni.setStorageSync 持久化
 - 使用 uni.getStorageSync 读取缓存
+- store 仅保存状态
+- 数据请求放 api
+- 禁止巨型 store
 
 禁止：
 

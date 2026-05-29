@@ -86,7 +86,19 @@
         "navigationBarTextStyle": "black",
         "backgroundColor": "#f8f8f8"
       }
+    },
+    // #ifdef MP-WEIXIN
+    {
+      "path": "pages/admin/index/index",
+      "type": "page",
+      "style": {
+        "navigationBarTitleText": "管理后台",
+        "navigationBarBackgroundColor": "#ffffff",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#f8f8f8"
+      }
     }
+    // #endif
   ],
   "subPackages": [],
   "tabBar": {
@@ -119,7 +131,15 @@
         //   "text": "我的",
         //   "iconPath": "static/tab/my.png",
         //   "selectedIconPath": "static/tab/my-active.png"
+      },
+      // #ifdef MP-WEIXIN
+      {
+        "pagePath": "pages/my/my",
+        "text": "我的",
+        "iconPath": "static/tab/my.png",
+        "selectedIconPath": "static/tab/my-active.png"
       }
+      // #endif
     ]
   }
 }

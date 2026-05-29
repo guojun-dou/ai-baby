@@ -4,16 +4,21 @@
   import { computed } from 'vue'
 
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
+  import { useAdminStore } from '@/stores/admin'
   import { useUserStore } from '@/stores/user'
 
   const { pageRootStyle } = usePageRootStyle()
   const userStore = useUserStore()
+  const adminStore = useAdminStore()
   const { userInfo } = storeToRefs(userStore)
+  const { canShowAdminEntry } = storeToRefs(adminStore)
 
   /** 与 Store 字段对齐：nickName / avatarUrl */
   const displayNickname = computed(() => {
     const n = userInfo.value?.nickName
-    if (n != null && String(n).trim() !== '') return String(n).trim()
+    if (n != null && String(n).trim() !== '') {
+      return String(n).trim()
+    }
     return '亲爱的宝妈'
   })
 
@@ -24,7 +29,17 @@
 
   onShow(() => {
     userStore.hydrateFromStorage()
+    void adminStore.fetchAdminStatus()
   })
+
+  function goAdmin() {
+    uni.navigateTo({
+      url: '/pages/admin/index/index',
+      fail() {
+        uni.showToast({ title: '页面未找到', icon: 'none' })
+      },
+    })
+  }
 
   function goOrders() {
     uni.switchTab({
@@ -76,6 +91,16 @@
           <text class="nickname">{{ displayNickname }}</text>
           <text class="welcome">愿你与宝宝每天都暖暖的</text>
         </view>
+      </view>
+    </view>
+
+    <view v-if="canShowAdminEntry" class="card menu">
+      <view class="cell" hover-class="cell-hover" @tap="goAdmin">
+        <view class="icon-text cell-main">
+          <uni-icons type="gear" :size="22" color="#ff8ba7" />
+          <text class="cell-title">管理后台</text>
+        </view>
+        <text class="cell-arrow">›</text>
       </view>
     </view>
 
