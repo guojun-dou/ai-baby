@@ -1,12 +1,15 @@
 import type {
+  AdminGoodsDetail,
   AdminGoodsListData,
   AdminGoodsListItem,
   AdminGoodsListParams,
+  SaveGoodsData,
+  SaveGoodsParams,
   UpdateGoodsStatusData,
   UpdateGoodsStatusParams,
 } from '@/types/goods-admin'
 
-import { callAdminCloud } from '@/api/cloud'
+import { callAdminCloud, callUserCloud } from '@/api/cloud'
 
 const PAGE_SIZE = 10
 
@@ -199,6 +202,113 @@ export async function updateGoodsStatus(
     action: params.action,
     status: params.status,
     deleted: params.action === 'delete' ? true : undefined,
+  })
+  // #endif
+}
+
+const MOCK_DETAIL: Record<string, AdminGoodsDetail> = {
+  'mock-g1': {
+    _id: 'mock-g1',
+    title: '有机高铁米粉 原味',
+    subtitle: '初尝辅食优选',
+    desc: '二价铁易吸收，粉质细腻好冲泡。',
+    price: 39.9,
+    originalPrice: 49.9,
+    stock: 200,
+    category: '米粉',
+    age: '6月+',
+    tags: ['有机', '高铁'],
+    images: ['/static/logo.svg'],
+    cover: '/static/logo.svg',
+    status: 1,
+    sort: 1,
+  },
+}
+
+function mapDetail(raw: Record<string, unknown>): AdminGoodsDetail {
+  const id = raw._id != null ? String(raw._id) : ''
+  const imagesRaw = Array.isArray(raw.images) ? raw.images : []
+  const images = imagesRaw.map((u) => String(u))
+  const cover = raw.cover != null ? String(raw.cover) : images[0] ?? ''
+  const tagsRaw = Array.isArray(raw.tags) ? raw.tags : []
+
+  return {
+    _id: id,
+    title: raw.title != null ? String(raw.title) : '',
+    subtitle: raw.subtitle != null ? String(raw.subtitle) : '',
+    desc: raw.desc != null ? String(raw.desc) : '',
+    price: Number(raw.price) || 0,
+    originalPrice:
+      raw.originalPrice != null ? Number(raw.originalPrice) : undefined,
+    stock: Math.floor(Number(raw.stock) || 0),
+    category: raw.category != null ? String(raw.category) : '',
+    age: raw.age != null ? String(raw.age) : '',
+    tags: tagsRaw.map((t) => String(t)),
+    images: images.length > 0 ? images : cover ? [cover] : [],
+    cover,
+    status: raw.status === 0 ? 0 : 1,
+    sort: Math.floor(Number(raw.sort) || 0),
+  }
+}
+
+/** 管理端获取商品详情（编辑回填） */
+export async function getAdminGoodsDetail(goodsId: string): Promise<AdminGoodsDetail> {
+  const id = String(goodsId).trim()
+  if (!id) {
+    throw new Error('缺少商品 id')
+  }
+
+  // #ifdef MP-WEIXIN
+  try {
+    const raw = await callUserCloud<Record<string, unknown>>('goods', {
+      action: 'detail',
+      id,
+    })
+    return mapDetail(raw)
+  }
+  catch (e) {
+    console.error(e)
+    if (MOCK_DETAIL[id]) {
+      return { ...MOCK_DETAIL[id]! }
+    }
+    throw e
+  }
+  // #endif
+
+  // #ifndef MP-WEIXIN
+  if (MOCK_DETAIL[id]) {
+    return { ...MOCK_DETAIL[id]! }
+  }
+  throw new Error('商品不存在')
+  // #endif
+}
+
+/** 新增 / 编辑商品 */
+export async function saveGoods(params: SaveGoodsParams): Promise<SaveGoodsData> {
+  const payload: Record<string, unknown> = {
+    goodsId: params.goodsId,
+    title: params.title,
+    subtitle: params.subtitle ?? '',
+    desc: params.desc,
+    price: params.price,
+    originalPrice: params.originalPrice,
+    stock: params.stock,
+    category: params.category ?? '',
+    age: params.age,
+    tags: params.tags,
+    images: params.images,
+    cover: params.cover,
+    status: params.status,
+    sort: params.sort ?? 0,
+  }
+
+  // #ifdef MP-WEIXIN
+  return callAdminCloud<SaveGoodsData>('admin-save-goods', payload)
+  // #endif
+
+  // #ifndef MP-WEIXIN
+  return Promise.resolve({
+    goodsId: params.goodsId ?? `mock-${Date.now()}`,
   })
   // #endif
 }

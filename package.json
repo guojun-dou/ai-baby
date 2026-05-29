@@ -30,6 +30,7 @@
     "@dcloudio/uni-mp-weixin": "3.0.0-5000720260410001",
     "@dcloudio/uni-mp-xhs": "3.0.0-5000720260410001",
     "@dcloudio/uni-quickapp-webview": "3.0.0-5000720260410001",
+    "@dcloudio/uni-ui": "^1.5.12",
     "@uni-helper/uni-network": "^0.23.1",
     "@uni-helper/uni-promises": "^0.2.1",
     "pinia": "2.2.4",

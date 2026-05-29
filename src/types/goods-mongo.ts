@@ -26,8 +26,17 @@ export interface GoodMongoDocument {
   /** 商品标题 */
   title: string
 
+  /** 副标题（列表辅助文案） */
+  subtitle?: string
+
   /** 简短描述（列表/卡片） */
   desc: string
+
+  /** 原价（元，划线价） */
+  originalPrice?: number
+
+  /** 分类 */
+  category?: string
 
   /** 单价（元） */
   price: number
