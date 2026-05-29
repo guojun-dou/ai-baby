@@ -14,7 +14,8 @@ type _LocationUrl =
   "/pages/admin/goods/index" |
   "/pages/admin/goods-edit/index" |
   "/pages/admin/index/index" |
-  "/pages/admin/order/index";
+  "/pages/admin/order/index" |
+  "/pages/admin/order-detail/index";
 
 interface NavigateToOptions {
   url: _LocationUrl;

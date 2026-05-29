@@ -127,6 +127,17 @@
       "type": "page",
       "style": {
         "navigationBarTitleText": "订单管理",
+        "backgroundColor": "#fff7f9",
+        "enablePullDownRefresh": true
+      }
+    },
+    // #endif
+    // #ifdef MP-WEIXIN
+    {
+      "path": "pages/admin/order-detail/index",
+      "type": "page",
+      "style": {
+        "navigationBarTitleText": "订单详情",
         "backgroundColor": "#fff7f9"
       }
     }
