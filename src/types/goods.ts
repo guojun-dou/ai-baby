@@ -14,6 +14,10 @@ export type GoodItem = Partial<GoodMongoDocument> & {
   month_label?: string
   monthAge?: string | number
   ageMonths?: number
+  /** 1 上架 / 0 下架 */
+  status?: number
+  deleted?: boolean
+  sales?: number
 }
 
 /** 详情页：与列表同源 + 扩展文案别名（`storage` 见 `GoodMongoDocument`） */

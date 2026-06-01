@@ -1,3 +1,4 @@
+import type { GoodDetail, GoodItem } from '@/types/goods'
 import type {
   AdminGoodsDetail,
   AdminGoodsListData,
@@ -8,10 +9,14 @@ import type {
   UpdateGoodsStatusData,
   UpdateGoodsStatusParams,
 } from '@/types/goods-admin'
+import type {
+  CartGoodsCheckData,
+  UserGoodsListData,
+  UserGoodsListParams,
+} from '@/types/user-goods'
 
 import { callAdminCloud, callUserCloud } from '@/api/cloud'
-
-const PAGE_SIZE = 10
+import { isGoodsPurchasable } from '@/utils/goods-fields'
 
 const MOCK_GOODS: AdminGoodsListItem[] = [
   {
@@ -314,3 +319,247 @@ export async function saveGoods(params: SaveGoodsParams): Promise<SaveGoodsData>
 }
 
 export { MOCK_GOODS as ADMIN_GOODS_MOCK }
+
+const USER_MOCK_GOODS: GoodItem[] = [
+  {
+    _id: 'mock-1',
+    title: '有机高铁米粉 原味',
+    desc: '二价铁易吸收，粉质细腻好冲泡',
+    price: 39.9,
+    cover: '/static/logo.svg',
+    images: ['/static/logo.svg'],
+    tags: ['有机', '高铁'],
+    age: '6月+',
+    stock: 99,
+    status: 1,
+    sort: 1,
+    sales: 128,
+  },
+  {
+    _id: 'mock-2',
+    title: '胡萝卜南瓜泥',
+    desc: '无添加糖盐，开袋即食',
+    price: 12.8,
+    cover: '/static/logo.svg',
+    images: ['/static/logo.svg'],
+    tags: ['果蔬'],
+    age: '7月+',
+    stock: 86,
+    status: 1,
+    sort: 2,
+    sales: 56,
+  },
+  {
+    _id: 'mock-3',
+    title: '婴儿营养面条',
+    desc: '短面易吞咽，钙铁锌强化',
+    price: 28,
+    cover: '/static/logo.svg',
+    images: ['/static/logo.svg'],
+    tags: ['钙铁锌'],
+    age: '8月+',
+    stock: 0,
+    status: 1,
+    sort: 3,
+    sales: 34,
+  },
+  {
+    _id: 'mock-4',
+    title: '西梅苹果泥',
+    desc: '酸甜开胃，膳食纤维友好',
+    price: 15.5,
+    cover: '/static/logo.svg',
+    images: ['/static/logo.svg'],
+    tags: ['膳食纤维'],
+    age: '6月+',
+    stock: 120,
+    status: 1,
+    sort: 4,
+    sales: 89,
+  },
+  {
+    _id: 'mock-5',
+    title: '鳕鱼南瓜粥',
+    desc: '深海鳕鱼，软糯好消化',
+    price: 18.9,
+    cover: '/static/logo.svg',
+    images: ['/static/logo.svg'],
+    tags: ['高蛋白'],
+    age: '9月+',
+    stock: 45,
+    status: 1,
+    sort: 5,
+    sales: 22,
+  },
+  {
+    _id: 'mock-6',
+    title: '紫薯小米糊',
+    desc: '谷物细腻，暖胃好吸收',
+    price: 16.8,
+    cover: '/static/logo.svg',
+    images: ['/static/logo.svg'],
+    tags: ['谷物'],
+    age: '6月+',
+    stock: 60,
+    status: 0,
+    sort: 6,
+    sales: 41,
+  },
+]
+
+function filterUserMock(params: UserGoodsListParams): UserGoodsListData {
+  const page = Math.max(1, Math.floor(params.page ?? 1))
+  const pageSize = Math.min(20, Math.max(1, Math.floor(params.pageSize ?? PAGE_SIZE)))
+  const keyword = String(params.keyword ?? '').trim().toLowerCase()
+  const sortBy = params.sortBy ?? 'sort'
+  const sortOrder = params.sortOrder ?? 'asc'
+
+  let rows = USER_MOCK_GOODS.filter((g) => isGoodsPurchasable(g))
+
+  if (keyword) {
+    rows = rows.filter((g) => {
+      const title = (g.title ?? g.name ?? '').toLowerCase()
+      return title.includes(keyword)
+    })
+  }
+
+  rows = [...rows].sort((a, b) => {
+    if (sortBy === 'price') {
+      const diff = (Number(a.price) || 0) - (Number(b.price) || 0)
+      return sortOrder === 'asc' ? diff : -diff
+    }
+    if (sortBy === 'sales') {
+      return (Number(b.sales) || 0) - (Number(a.sales) || 0)
+    }
+    if (sortBy === 'createTime') {
+      return 0
+    }
+    const diff = (Number(a.sort) || 0) - (Number(b.sort) || 0)
+    return diff
+  })
+
+  const total = rows.length
+  const start = (page - 1) * pageSize
+  const list = rows.slice(start, start + pageSize)
+
+  return {
+    list,
+    page,
+    pageSize,
+    total,
+    hasMore: start + list.length < total,
+  }
+}
+
+/** 用户端商品分页列表（仅上架、未删除） */
+export async function getUserGoodsList(
+  params: UserGoodsListParams = {},
+): Promise<UserGoodsListData> {
+  const payload = {
+    action: 'list',
+    page: params.page ?? 1,
+    pageSize: params.pageSize ?? PAGE_SIZE,
+    keyword: params.keyword ?? '',
+    sortBy: params.sortBy ?? 'sort',
+    sortOrder: params.sortOrder ?? 'asc',
+  }
+
+  // #ifdef MP-WEIXIN
+  try {
+    return await callUserCloud<UserGoodsListData>('goods', payload)
+  }
+  catch (e) {
+    console.error(e)
+    return filterUserMock(payload)
+  }
+  // #endif
+
+  // #ifndef MP-WEIXIN
+  return filterUserMock(payload)
+  // #endif
+}
+
+/** 用户端商品详情 */
+export async function getUserGoodsDetail(id: string): Promise<GoodDetail> {
+  const goodsId = String(id).trim()
+  if (!goodsId) {
+    throw new Error('缺少商品 id')
+  }
+
+  // #ifdef MP-WEIXIN
+  try {
+    const data = await callUserCloud<GoodDetail>('goods', {
+      action: 'detail',
+      id: goodsId,
+    })
+    if (!isGoodsPurchasable(data)) {
+      throw new Error('商品已下架')
+    }
+    return data
+  }
+  catch (e) {
+    console.error(e)
+    const mock = USER_MOCK_GOODS.find(
+      (g) => String(g._id ?? g.id) === goodsId,
+    )
+    if (mock && isGoodsPurchasable(mock)) {
+      return { ...mock }
+    }
+    throw e
+  }
+  // #endif
+
+  // #ifndef MP-WEIXIN
+  const mock = USER_MOCK_GOODS.find((g) => String(g._id ?? g.id) === goodsId)
+  if (mock && isGoodsPurchasable(mock)) {
+    return { ...mock }
+  }
+  throw new Error('商品不存在或已下架')
+  // #endif
+}
+
+/** 购物车批量校验商品在售状态 */
+export async function checkCartGoods(ids: string[]): Promise<CartGoodsCheckData> {
+  const uniqueIds = [...new Set(ids.map((id) => String(id).trim()).filter(Boolean))]
+
+  // #ifdef MP-WEIXIN
+  try {
+    return await callUserCloud<CartGoodsCheckData>('goods', {
+      action: 'batchCheck',
+      ids: uniqueIds,
+    })
+  }
+  catch (e) {
+    console.error(e)
+    const items = uniqueIds.map((id) => {
+      const mock = USER_MOCK_GOODS.find((g) => String(g._id ?? g.id) === id)
+      const onSale = mock ? isGoodsPurchasable(mock) : false
+      return {
+        _id: id,
+        onSale,
+        title: mock ? String(mock.title ?? '') : '',
+        price: mock ? Number(mock.price) || 0 : 0,
+        cover: mock ? String(mock.cover ?? '') : '',
+        stock: mock ? Math.floor(Number(mock.stock) || 0) : 0,
+      }
+    })
+    return { items }
+  }
+  // #endif
+
+  // #ifndef MP-WEIXIN
+  const items = uniqueIds.map((id) => {
+    const mock = USER_MOCK_GOODS.find((g) => String(g._id ?? g.id) === id)
+    const onSale = mock ? isGoodsPurchasable(mock) : false
+    return {
+      _id: id,
+      onSale,
+      title: mock ? String(mock.title ?? '') : '',
+      price: mock ? Number(mock.price) || 0 : 0,
+      cover: mock ? String(mock.cover ?? '') : '',
+      stock: mock ? Math.floor(Number(mock.stock) || 0) : 0,
+    }
+  })
+  return { items }
+  // #endif
+}

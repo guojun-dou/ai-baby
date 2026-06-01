@@ -1,4 +1,9 @@
 import type {
+  UserOrderListData,
+  UserOrderListParams,
+  UserOrderRecord,
+} from '@/types/order'
+import type {
   AdminOrderDetail,
   AdminOrderListData,
   AdminOrderListItem,
@@ -7,9 +12,10 @@ import type {
   UpdateOrderStatusParams,
 } from '@/types/order-admin'
 
-import { callAdminCloud } from '@/api/cloud'
+import { callAdminCloud, callUserCloud } from '@/api/cloud'
 
 import { normalizeAdminOrderStatus } from '@/types/order-admin'
+import { normalizeUserOrderStatus } from '@/utils/order-status'
 
 const PAGE_SIZE = 10
 
@@ -284,5 +290,108 @@ export async function updateOrderStatus(
     orderId: params.orderId,
     status: params.status,
   })
+  // #endif
+}
+
+const USER_MOCK_ORDERS: UserOrderRecord[] = [
+  {
+    id: 'ord-20260510001',
+    status: 1,
+    totalPrice: 67.7,
+    createTime: '2026-05-10T10:20:00.000Z',
+    goodsList: [
+      { title: '有机高铁米粉 原味', cover: '/static/logo.svg', count: 1 },
+      { title: '胡萝卜南瓜泥', cover: '/static/logo.svg', count: 2 },
+    ],
+  },
+  {
+    id: 'ord-20260509002',
+    status: 2,
+    totalPrice: 28,
+    createTime: '2026-05-09T15:40:00.000Z',
+    goodsList: [{ title: '婴儿营养面条', cover: '/static/logo.svg', count: 1 }],
+  },
+  {
+    id: 'ord-20260508003',
+    status: 3,
+    totalPrice: 15.5,
+    createTime: '2026-05-08T09:00:00.000Z',
+    goodsList: [{ title: '西梅苹果泥', cover: '/static/logo.svg', count: 1 }],
+  },
+  {
+    id: 'ord-20260507004',
+    status: 3,
+    totalPrice: 92.4,
+    createTime: '2026-05-07T18:30:00.000Z',
+    goodsList: [
+      { title: '有机高铁米粉 原味', cover: '/static/logo.svg', count: 2 },
+      { title: '婴儿营养面条', cover: '/static/logo.svg', count: 1 },
+    ],
+  },
+  {
+    id: 'ord-20260506005',
+    status: 1,
+    totalPrice: 45.6,
+    createTime: '2026-05-06T11:15:00.000Z',
+    goodsList: [
+      { title: '鳕鱼南瓜粥', cover: '/static/logo.svg', count: 2 },
+    ],
+  },
+  {
+    id: 'ord-20260505006',
+    status: 4,
+    totalPrice: 39.9,
+    createTime: '2026-05-05T16:20:00.000Z',
+    goodsList: [{ title: '有机高铁米粉 原味', cover: '/static/logo.svg', count: 1 }],
+  },
+]
+
+function filterUserOrderMock(params: UserOrderListParams): UserOrderListData {
+  const page = Math.max(1, Math.floor(params.page ?? 1))
+  const pageSize = Math.min(20, Math.max(1, Math.floor(params.pageSize ?? PAGE_SIZE)))
+  const status = params.status ?? 'all'
+
+  let rows = [...USER_MOCK_ORDERS]
+  if (status !== 'all') {
+    const code = normalizeUserOrderStatus(Number(status))
+    rows = rows.filter((o) => o.status === code)
+  }
+
+  const total = rows.length
+  const start = (page - 1) * pageSize
+  const list = rows.slice(start, start + pageSize)
+
+  return {
+    list,
+    page,
+    pageSize,
+    total,
+    hasMore: start + list.length < total,
+  }
+}
+
+/** 用户端订单分页列表 */
+export async function getUserOrderList(
+  params: UserOrderListParams = {},
+): Promise<UserOrderListData> {
+  const payload = {
+    action: 'list',
+    page: params.page ?? 1,
+    pageSize: params.pageSize ?? PAGE_SIZE,
+    status: params.status ?? 'all',
+  }
+
+  // #ifdef MP-WEIXIN
+  try {
+    return await callUserCloud<UserOrderListData>('orders', payload)
+  }
+  catch (e) {
+    console.error(e)
+    return filterUserOrderMock(payload)
+  }
+  // #endif
+
+  // #ifndef MP-WEIXIN
+  return filterUserOrderMock(payload)
   // #endif
 }

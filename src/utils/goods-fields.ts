@@ -54,6 +54,25 @@ export function getGoodsCardTag(item: GoodItem): string {
   return '全阶段'
 }
 
+/** 是否可购买：上架、未删除、有库存 */
+export function isGoodsPurchasable(item: GoodItem | null | undefined): boolean {
+  if (!item) {
+    return false
+  }
+  if (item.deleted === true) {
+    return false
+  }
+  const st = item.status
+  if (st === 0) {
+    return false
+  }
+  const stock = item.stock
+  if (typeof stock === 'number' && stock <= 0) {
+    return false
+  }
+  return true
+}
+
 /** 详情轮播：images 非空优先，否则单图 cover / 旧字段 */
 export function getDetailImageList(d: GoodDetail | null | undefined): string[] {
   if (!d) {

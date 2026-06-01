@@ -3,8 +3,9 @@ import { onShow } from '@dcloudio/uni-app'
 import { storeToRefs } from 'pinia'
 import { ref, watch } from 'vue'
 
-import { usePageRootStyle } from '@/composables/usePageRootStyle'
+import { checkCartGoods } from '@/api/goods'
 import EmptyState from '@/components/EmptyState.vue'
+import { usePageRootStyle } from '@/composables/usePageRootStyle'
 import SubmitBar from '@/components/SubmitBar.vue'
 
 import { useCartStore } from '@/stores/cart'
@@ -16,6 +17,8 @@ const cart = useCartStore()
 const { cartList, totalPrice, totalCount } = storeToRefs(cart)
 
 const cartCoverUrlMap = ref<Record<string, string>>({})
+const invalidIds = ref<Set<string>>(new Set())
+const validating = ref(false)
 
 function cartCoverDisplay(raw: string) {
   return resolveImageSrcForDisplay(raw, cartCoverUrlMap.value)
@@ -35,10 +38,53 @@ watch(
   { deep: true, immediate: true },
 )
 
-/** 返回页面时与本地缓存对齐 */
+/** 返回页面时与本地缓存对齐，并校验商品是否仍在上架 */
 onShow(() => {
   cart.hydrateFromStorage()
+  void validateCartItems()
 })
+
+async function validateCartItems() {
+  const ids = cartList.value.map((i) => i._id)
+  if (ids.length === 0) {
+    invalidIds.value = new Set()
+    return
+  }
+
+  validating.value = true
+  try {
+    const { items } = await checkCartGoods(ids)
+    const nextInvalid = new Set<string>()
+    const removedTitles: string[] = []
+
+    for (const row of items) {
+      if (!row.onSale || row.stock <= 0) {
+        nextInvalid.add(row._id)
+        cart.removeCart(row._id)
+        if (row.title) {
+          removedTitles.push(row.title)
+        }
+      }
+    }
+
+    invalidIds.value = nextInvalid
+
+    if (removedTitles.length > 0) {
+      uni.showToast({
+        title: removedTitles.length === 1
+          ? `${removedTitles[0]}已下架`
+          : `${removedTitles.length}件商品已失效`,
+        icon: 'none',
+      })
+    }
+  }
+  catch (e) {
+    console.error(e)
+  }
+  finally {
+    validating.value = false
+  }
+}
 
 function formatLinePrice(price: number, count: number) {
   return `¥${(price * count).toFixed(2)}`
@@ -70,6 +116,10 @@ function confirmRemove(_id: string) {
 function goCheckout() {
   if (cartList.value.length === 0) {
     uni.showToast({ title: '购物车是空的', icon: 'none' })
+    return
+  }
+  if (validating.value) {
+    uni.showToast({ title: '正在校验商品', icon: 'none' })
     return
   }
   uni.navigateTo({

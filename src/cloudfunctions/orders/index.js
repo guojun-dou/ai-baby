@@ -6,10 +6,6 @@ cloud.init({
 
 const db = cloud.database()
 
-/** @typedef {'pending'|'delivering'|'completed'} OrderStatus */
-
-const ORDER_STATUS = new Set(['pending', 'delivering', 'completed'])
-
 function ok(data) {
   return {
     success: true,
@@ -43,6 +39,50 @@ function toIsoTime(v) {
   }
   catch {
     return ''
+  }
+}
+
+/**
+ * @param {unknown} raw
+ * @returns {number}
+ */
+function normalizeStatusCode(raw) {
+  if (raw === 0 || raw === '0') {
+    return 0
+  }
+  if (raw === 1 || raw === '1' || raw === 'pending') {
+    return 1
+  }
+  if (raw === 2 || raw === '2' || raw === 'delivering') {
+    return 2
+  }
+  if (raw === 3 || raw === '3' || raw === 'completed') {
+    return 3
+  }
+  if (raw === 4 || raw === '4' || raw === 'cancelled' || raw === 'canceled') {
+    return 4
+  }
+  return 1
+}
+
+/**
+ * @param {number} code
+ * @returns {Array<number|string>}
+ */
+function statusCodeToDbValues(code) {
+  switch (code) {
+    case 0:
+      return [0, '0']
+    case 1:
+      return [1, '1', 'pending']
+    case 2:
+      return [2, '2', 'delivering']
+    case 3:
+      return [3, '3', 'completed']
+    case 4:
+      return [4, '4', 'cancelled', 'canceled']
+    default:
+      return [1, '1', 'pending']
   }
 }
 
@@ -101,7 +141,6 @@ function pickCreateTime(doc) {
 }
 
 /**
- * 列表页需要的单行形状
  * @param {unknown} line
  */
 function mapGoodsLineForList(line) {
@@ -117,7 +156,6 @@ function mapGoodsLineForList(line) {
 }
 
 /**
- * 数据库文档 -> 前端订单列表项（与小程序 OrderRecord 对齐）
  * @param {Record<string, unknown>} doc
  */
 function mapOrderDoc(doc) {
@@ -126,7 +164,7 @@ function mapOrderDoc(doc) {
   const goodsList = rawLines.map(mapGoodsLineForList)
   return {
     id,
-    status: doc.status,
+    status: normalizeStatusCode(doc.status),
     totalPrice: pickTotalPrice(doc),
     createTime: pickCreateTime(doc),
     goodsList,
@@ -141,7 +179,6 @@ function isPhoneCn(phone) {
 }
 
 /**
- * 创建订单（入库字段与 `OrderMongoDocument` 一致）
  * @param {Record<string, unknown>} event
  * @param {string} openid
  */
@@ -217,7 +254,7 @@ async function handleCreate(event, openid) {
       openid,
       goodsList,
       totalPrice,
-      status: 'pending',
+      status: 1,
       username,
       phone,
       address,
@@ -230,65 +267,61 @@ async function handleCreate(event, openid) {
 
   return ok({
     orderId: addRes._id,
-    status: 'pending',
+    status: 1,
     totalPrice,
   })
 }
 
 /**
- * 当前用户的订单列表
- * @param {string} openid
- */
-async function handleList(openid) {
-  const res = await db.collection('orders').where({ openid }).get()
-
-  const raw = Array.isArray(res.data) ? res.data : []
-  const list = raw
-    .map((doc) => mapOrderDoc(doc))
-    .sort((a, b) => {
-      const ta = Date.parse(a.createTime) || 0
-      const tb = Date.parse(b.createTime) || 0
-      return tb - ta
-    })
-  return ok(list)
-}
-
-/**
- * 更新订单状态（仅订单归属者可改）
  * @param {Record<string, unknown>} event
  * @param {string} openid
  */
-async function handleUpdateStatus(event, openid) {
-  const orderId = event.orderId != null ? String(event.orderId).trim() : ''
-  const status = event.status != null ? String(event.status).trim() : ''
+async function handleList(event, openid) {
+  const page = Math.max(1, Math.floor(Number(event.page) || 1))
+  const pageSize = Math.min(
+    20,
+    Math.max(1, Math.floor(Number(event.pageSize) || 10)),
+  )
+  const statusRaw = event.status != null ? String(event.status).trim() : 'all'
 
-  if (!orderId) {
-    return fail('BAD_REQUEST', '缺少 orderId')
-  }
-  if (!ORDER_STATUS.has(status)) {
-    return fail('BAD_REQUEST', 'status 须为 pending | delivering | completed')
+  const _ = db.command
+  const conditions = [{ openid }]
+
+  if (statusRaw !== '' && statusRaw !== 'all') {
+    const code = normalizeStatusCode(
+      Number.isFinite(Number(statusRaw)) ? Number(statusRaw) : statusRaw,
+    )
+    conditions.push({
+      status: _.in(statusCodeToDbValues(code)),
+    })
   }
 
-  const docRef = db.collection('orders').doc(orderId)
-  const snap = await docRef.get()
-  if (!snap.data) {
-    return fail('NOT_FOUND', '订单不存在')
-  }
-  const owner = snap.data.openid != null ? String(snap.data.openid) : ''
-  if (owner !== openid) {
-    return fail('FORBIDDEN', '无权操作该订单')
-  }
+  const where = _.and(conditions)
+  const skip = (page - 1) * pageSize
 
-  await docRef.update({
-    data: {
-      status,
-      updateTime: db.serverDate(),
-    },
-  })
+  const [countRes, listRes] = await Promise.all([
+    db.collection('orders').where(where).count(),
+    db
+      .collection('orders')
+      .where(where)
+      .orderBy('createTime', 'desc')
+      .skip(skip)
+      .limit(pageSize)
+      .get(),
+  ])
+
+  const total = countRes.total || 0
+  const rawList = Array.isArray(listRes.data) ? listRes.data : []
+  const list = rawList.map((doc) =>
+    mapOrderDoc(/** @type {Record<string, unknown>} */ (doc)),
+  )
 
   return ok({
-    orderId,
-    status,
+    list,
+    page,
+    pageSize,
+    total,
+    hasMore: skip + list.length < total,
   })
 }
 
@@ -310,13 +343,10 @@ exports.main = async (event = {}) => {
       return await handleCreate(event, openid)
     }
     if (action === 'list') {
-      return await handleList(openid)
-    }
-    if (action === 'updateStatus') {
-      return await handleUpdateStatus(event, openid)
+      return await handleList(event, openid)
     }
 
-    return fail('BAD_REQUEST', '缺少或未知的 action（create | list | updateStatus）')
+    return fail('BAD_REQUEST', '缺少或未知的 action（create | list）')
   }
   catch (err) {
     console.error('[orders]', err)

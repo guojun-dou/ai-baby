@@ -1,8 +1,10 @@
 <script setup lang="ts">
   import type { GoodItem } from '@/types/goods'
+  import type { UserGoodsSortBy } from '@/types/user-goods'
   import { onPullDownRefresh } from '@dcloudio/uni-app'
 
-  import { onMounted, ref } from 'vue'
+  import { ref } from 'vue'
+  import { getUserGoodsList } from '@/api/goods'
   import EmptyState from '@/components/EmptyState.vue'
   import GoodsCard from '@/components/GoodsCard.vue'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
@@ -19,67 +21,27 @@
     getGoodsTitle,
   } from '@/utils/goods-fields'
 
-  interface GoodsCloudResult {
-    success?: boolean
-    data?: GoodItem[]
-    error?: unknown
-  }
+  const PAGE_SIZE = 10
 
-  /** 本地 mock：云函数不可用、返回空或失败时使用，保证可直接运行预览 */
-  const MOCK_GOODS: GoodItem[] = [
-    {
-      id: 'mock-1',
-      title: '有机高铁米粉 原味',
-      desc: '二价铁易吸收，粉质细腻好冲泡',
-      price: 39.9,
-      cover: '/static/logo.svg',
-      images: ['/static/logo.svg'],
-      tags: ['有机', '高铁'],
-      age: '6月+',
-      stock: 99,
-    },
-    {
-      id: 'mock-2',
-      title: '胡萝卜南瓜泥',
-      desc: '无添加糖盐，开袋即食',
-      price: 12.8,
-      cover: '/static/logo.svg',
-      images: ['/static/logo.svg'],
-      tags: ['果蔬'],
-      age: '7月+',
-      stock: 99,
-    },
-    {
-      id: 'mock-3',
-      title: '婴儿营养面条',
-      desc: '短面易吞咽，钙铁锌强化',
-      price: 28,
-      cover: '/static/logo.svg',
-      images: ['/static/logo.svg'],
-      tags: ['钙铁锌'],
-      age: '8月+',
-      stock: 99,
-    },
-    {
-      id: 'mock-4',
-      title: '西梅苹果泥',
-      desc: '酸甜开胃，膳食纤维友好',
-      price: 15.5,
-      cover: '/static/logo.svg',
-      images: ['/static/logo.svg'],
-      tags: ['膳食纤维'],
-      age: '6月+',
-      stock: 99,
-    },
+  const sortOptions: { label: string; value: UserGoodsSortBy; order: 'asc' | 'desc' }[] = [
+    { label: '综合排序', value: 'sort', order: 'asc' },
+    { label: '销量优先', value: 'sales', order: 'desc' },
+    { label: '价格从低到高', value: 'price', order: 'asc' },
+    { label: '价格从高到低', value: 'price', order: 'desc' },
+    { label: '最新上架', value: 'createTime', order: 'desc' },
   ]
 
   const { pageRootStyle } = usePageRootStyle()
 
   const list = ref<GoodItem[]>([])
   const loading = ref(true)
-  const loadError = ref('')
+  const loadingMore = ref(false)
+  const hasMore = ref(false)
+  const page = ref(1)
+  const keyword = ref('')
+  const searchInput = ref('')
+  const sortIndex = ref(0)
 
-  /** cloud:// → 临时 HTTPS，供列表封面展示 */
   const listCoverUrlMap = ref<Record<string, string>>({})
 
   function listCoverDisplay(raw: string) {
@@ -102,78 +64,87 @@
     listCoverUrlMap.value = Object.fromEntries(m)
   }
 
-  async function fetchGoodsList(): Promise<GoodItem[]> {
-    // #ifdef MP-WEIXIN
-    return new Promise((resolve, reject) => {
-      wx.cloud.callFunction({
-        name: 'goods',
-        data: {},
-        success(res) {
-          const result = res.result as GoodsCloudResult
-          if (result?.success && Array.isArray(result.data)) {
-            resolve(result.data)
-          } else {
-            reject(new Error('云函数返回异常'))
-          }
-        },
-        fail(err) {
-          reject(err)
-        },
-      })
-    })
-    // #endif
-
-    // #ifndef MP-WEIXIN
-    return Promise.resolve([])
-    // #endif
+  function currentSort() {
+    return sortOptions[sortIndex.value] ?? sortOptions[0]!
   }
 
-  function applyMock() {
-    list.value = MOCK_GOODS.map((m, i) => ({
-      ...m,
-      id: m.id ?? `mock-${i + 1}`,
-    }))
-    loadError.value = ''
-  }
+  async function loadGoods(options?: { reset?: boolean; silent?: boolean }) {
+    const reset = options?.reset !== false
+    const silent = options?.silent === true
 
-  async function loadGoods(options?: { silent?: boolean }) {
-    if (!options?.silent) {
-      loading.value = true
-    }
-    loadError.value = ''
-    try {
-      const data: GoodItem[] = await fetchGoodsList()
-      if (data.length > 0) {
-        list.value = data
-        await syncListCoverUrls(list.value)
-      } else {
-        // #ifdef MP-WEIXIN
-        list.value = []
-        listCoverUrlMap.value = {}
-        // #endif
-        // #ifndef MP-WEIXIN
-        applyMock()
-        await syncListCoverUrls(list.value)
-        // #endif
+    if (reset) {
+      if (!silent) {
+        loading.value = true
       }
+      page.value = 1
+      hasMore.value = false
+    } else {
+      if (loadingMore.value || !hasMore.value) {
+        return
+      }
+      loadingMore.value = true
+    }
+
+    const sort = currentSort()
+    const nextPage = reset ? 1 : page.value + 1
+
+    try {
+      const data = await getUserGoodsList({
+        page: nextPage,
+        pageSize: PAGE_SIZE,
+        keyword: keyword.value,
+        sortBy: sort.value,
+        sortOrder: sort.order,
+      })
+
+      if (reset) {
+        list.value = data.list
+      } else {
+        list.value = [...list.value, ...data.list]
+      }
+
+      page.value = data.page
+      hasMore.value = data.hasMore
+      await syncListCoverUrls(list.value)
     } catch (e) {
       console.error(e)
-      applyMock()
-      await syncListCoverUrls(list.value)
+      if (reset) {
+        list.value = []
+        listCoverUrlMap.value = {}
+      }
     } finally {
       loading.value = false
+      loadingMore.value = false
     }
   }
 
-  onMounted(() => {
-    loadGoods()
-  })
+  function onSearch() {
+    keyword.value = searchInput.value.trim()
+    loadGoods({ reset: true })
+  }
+
+  function onClearSearch() {
+    searchInput.value = ''
+    keyword.value = ''
+    loadGoods({ reset: true })
+  }
+
+  function onSortChange(e: { detail: { value: string } }) {
+    sortIndex.value = Number(e.detail.value) || 0
+    loadGoods({ reset: true })
+  }
+
+  function onScrollToLower() {
+    loadGoods({ reset: false })
+  }
 
   onPullDownRefresh(() => {
-    loadGoods({ silent: true }).finally(() => {
+    loadGoods({ reset: true, silent: true }).finally(() => {
       uni.stopPullDownRefresh()
     })
   })
+
+  loadGoods({ reset: true })
 </script>
 
 <template>
@@ -183,39 +154,82 @@
       <text class="header-sub">一口温柔，陪伴成长</text>
     </view>
 
+    <view class="toolbar">
+      <view class="search-bar">
+        <input
+          v-model="searchInput"
+          class="search-input"
+          type="text"
+          confirm-type="search"
+          placeholder="搜索商品名称"
+          placeholder-class="search-placeholder"
+          @confirm="onSearch"
+        />
+        <text v-if="searchInput" class="search-clear" @tap="onClearSearch">清除</text>
+        <view class="search-btn" hover-class="search-btn-hover" @tap="onSearch">
+          <text class="search-btn-text">搜索</text>
+        </view>
+      </view>
+
+      <picker
+        class="sort-picker"
+        mode="selector"
+        :range="sortOptions"
+        range-key="label"
+        :value="sortIndex"
+        @change="onSortChange"
+      >
+        <view class="sort-trigger">
+          <text class="sort-text">{{ currentSort().label }}</text>
+          <text class="sort-arrow">▾</text>
+        </view>
+      </picker>
+    </view>
+
     <view v-if="loading && !list.length" class="state">
       <text class="state-text">正在加载好物…</text>
     </view>
 
-    <view v-else-if="loadError" class="state">
-      <text class="state-text">{{ loadError }}</text>
-      <view class="retry" @tap="loadGoods()">
-        <text class="retry-text">重新加载</text>
-      </view>
-    </view>
-
     <view v-else-if="!list.length" class="home-empty">
-      <EmptyState title="暂无商品" desc="稍后再来看看，或下拉刷新试试">
-        <view class="empty-slot-btn" hover-class="empty-slot-btn-hover" @tap="loadGoods()">
+      <EmptyState title="暂无商品" desc="换个关键词试试，或下拉刷新">
+        <view
+          class="empty-slot-btn"
+          hover-class="empty-slot-btn-hover"
+          @tap="loadGoods({ reset: true })"
+        >
           <text class="empty-slot-btn-text">重新加载</text>
         </view>
       </EmptyState>
     </view>
 
-    <view v-else class="grid-wrap">
-      <GoodsCard
-        v-for="item in list"
-        :key="getGoodsId(item) || getGoodsTitle(item)"
-        :goods-id="getGoodsId(item)"
-        :cover="listCoverDisplay(getGoodsCover(item))"
-        :cart-cover="getGoodsCover(item)"
-        :title="getGoodsTitle(item)"
-        :price="item.price"
-        :tag="getGoodsCardTag(item)"
-        :description="getGoodsDesc(item)"
-        show-add-cart
-      />
-    </view>
+    <scroll-view
+      v-else
+      class="scroll"
+      scroll-y
+      :show-scrollbar="false"
+      lower-threshold="120"
+      @scrolltolower="onScrollToLower"
+    >
+      <view class="grid-wrap">
+        <GoodsCard
+          v-for="item in list"
+          :key="getGoodsId(item) || getGoodsTitle(item)"
+          :goods-id="getGoodsId(item)"
+          :cover="listCoverDisplay(getGoodsCover(item))"
+          :cart-cover="getGoodsCover(item)"
+          :title="getGoodsTitle(item)"
+          :price="item.price"
+          :tag="getGoodsCardTag(item)"
+          :description="getGoodsDesc(item)"
+          show-add-cart
+        />
+      </view>
+
+      <view class="footer">
+        <text v-if="loadingMore" class="footer-text">加载中…</text>
+        <text v-else-if="!hasMore" class="footer-text">— 已经到底啦 —</text>
+      </view>
+    </scroll-view>
   </view>
 </template>
 
@@ -235,10 +249,13 @@
     min-height: 100vh;
     box-sizing: border-box;
     background-color: $page-bg;
+    display: flex;
+    flex-direction: column;
+
     .header {
       padding-left: $page-padding;
       padding-right: $page-padding;
-      padding-bottom: 28rpx;
+      padding-bottom: 20rpx;
 
       .header-title {
         display: block;
@@ -256,6 +273,79 @@
       }
     }
 
+    .toolbar {
+      padding: 0 $page-padding 16rpx;
+      box-sizing: border-box;
+
+      .search-bar {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 12rpx;
+        padding: 12rpx 20rpx;
+        background-color: $card-bg;
+        border-radius: 999rpx;
+        box-shadow: $shadow;
+
+        .search-input {
+          flex: 1;
+          min-width: 0;
+          font-size: 28rpx;
+          color: $text-color;
+        }
+
+        .search-clear {
+          flex-shrink: 0;
+          font-size: 24rpx;
+          color: $text-secondary;
+          padding: 4rpx 8rpx;
+        }
+
+        .search-btn {
+          flex-shrink: 0;
+          padding: 10rpx 24rpx;
+          display: inline-flex;
+          border-radius: 999rpx;
+          background-color: $primary-color;
+
+          .search-btn-text {
+            font-size: 24rpx;
+            line-height: 1;
+            color: #ffffff;
+          }
+        }
+
+        .search-btn-hover {
+          opacity: 0.9;
+        }
+      }
+
+      .sort-picker {
+        margin-top: 16rpx;
+
+        .sort-trigger {
+          display: inline-flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 8rpx;
+          padding: 10rpx 20rpx;
+          border-radius: 999rpx;
+          background-color: $card-bg;
+          box-shadow: $shadow;
+
+          .sort-text {
+            font-size: 24rpx;
+            color: $text-color;
+          }
+
+          .sort-arrow {
+            font-size: 20rpx;
+            color: $text-secondary;
+          }
+        }
+      }
+    }
+
     .state {
       display: flex;
       flex-direction: column;
@@ -270,20 +360,8 @@
       }
     }
 
-    .retry {
-      margin-top: 32rpx;
-      padding: 16rpx 40rpx;
-      border-radius: 999rpx;
-      background: $primary-color;
-      box-shadow: $shadow;
-
-      .retry-text {
-        font-size: 28rpx;
-        color: #ffffff;
-      }
-    }
-
     .home-empty {
+      flex: 1;
       padding: 40rpx $page-padding 80rpx;
       box-sizing: border-box;
     }
@@ -305,14 +383,33 @@
       opacity: 0.9;
     }
 
+    .scroll {
+      flex: 1;
+      height: 0;
+    }
+
     .grid-wrap {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: $card-gap;
-      padding: 8rpx $page-padding 40rpx;
+      padding: 8rpx $page-padding 0;
       box-sizing: border-box;
-      max-height: calc(100vh - 300rpx);
-      overflow-y: auto;
     }
+
+    .footer {
+      padding: 32rpx $page-padding 48rpx;
+      text-align: center;
+
+      .footer-text {
+        font-size: 24rpx;
+        color: $text-secondary;
+      }
+    }
+  }
+</style>
+
+<style>
+  .search-placeholder {
+    color: #999999;
   }
 </style>

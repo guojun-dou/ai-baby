@@ -3,77 +3,11 @@
   import { onLoad } from '@dcloudio/uni-app'
 
   import { computed, ref, watch } from 'vue'
+  import { getUserGoodsDetail } from '@/api/goods'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
   import { useCartStore } from '@/stores/cart'
   import { toDisplayImageUrls } from '@/utils/cloud-file'
-  import { getDetailAgeLabel, getDetailImageList, getGoodsCover, getGoodsTitle } from '@/utils/goods-fields'
-
-  interface GoodsDetailCloudResult {
-    success?: boolean
-    data?: GoodDetail | null
-    error?: unknown
-  }
-
-  const MOCK_BY_ID: Record<string, GoodDetail> = {
-    'mock-1': {
-      id: 'mock-1',
-      title: '有机高铁米粉 原味',
-      desc: '二价铁易吸收，粉质细腻好冲泡，适合初次添加辅食的宝宝。',
-      price: 39.9,
-      cover: '/static/logo.svg',
-      images: ['/static/logo.svg', '/static/logo.svg'],
-      tags: ['有机', '高铁'],
-      age: '6月+',
-      ingredients: '有机大米、二价铁、锌、钙、维生素 B1 等。',
-      nutrition: '强化铁锌钙，粉质细腻易冲调，适合初次添加辅食的宝宝。',
-      storage: '密封置于阴凉干燥处，开封后请于 30 天内食用完毕。',
-      stock: 99,
-    },
-    'mock-2': {
-      id: 'mock-2',
-      title: '胡萝卜南瓜泥',
-      desc: '无添加糖盐，开袋即食。',
-      price: 12.8,
-      cover: '/static/logo.svg',
-      images: ['/static/logo.svg'],
-      tags: ['果蔬'],
-      age: '7月+',
-      ingredients: '胡萝卜、南瓜、水。',
-      nutrition: '果蔬搭配，天然甜味，补充膳食纤维与 β-胡萝卜素。',
-      storage: '常温避光保存；开袋后需冷藏并于 24 小时内用完。',
-      stock: 99,
-    },
-    'mock-3': {
-      id: 'mock-3',
-      title: '婴儿营养面条',
-      desc: '短面易吞咽，钙铁锌强化。',
-      price: 28,
-      cover: '/static/logo.svg',
-      images: ['/static/logo.svg', '/static/logo.svg', '/static/logo.svg'],
-      tags: ['钙铁锌'],
-      age: '8月+',
-      ingredients: '小麦粉、钙、铁、锌等矿物质。',
-      nutrition: '短面设计便于吞咽，钙铁锌强化配方。',
-      storage: '干燥密封保存，开封后扎紧袋口防潮。',
-      stock: 99,
-    },
-    'mock-4': {
-      id: 'mock-4',
-      title: '西梅苹果泥',
-      desc: '酸甜开胃，膳食纤维友好。',
-      price: 15.5,
-      cover: '/static/logo.svg',
-      images: ['/static/logo.svg'],
-      tags: ['膳食纤维'],
-      age: '6月+',
-      ingredients: '苹果、西梅泥。',
-      nutrition: '含膳食纤维，酸甜适口，帮助肠道蠕动。',
-      storage: '常温阴凉干燥处保存；开袋后冷藏并尽快食用。',
-      stock: 99,
-    },
-  }
-
-  const DEFAULT_MOCK: GoodDetail = MOCK_BY_ID['mock-1']!
+  import { getDetailAgeLabel, getDetailImageList, getGoodsCover, getGoodsTitle, isGoodsPurchasable } from '@/utils/goods-fields'
 
   const { pageRootStyle } = usePageRootStyle()
 
@@ -82,6 +16,8 @@
   const loadError = ref('')
 
   const goodsId = ref('')
+
+  const canPurchase = computed(() => isGoodsPurchasable(detail.value))
 
   const swiperList = computed(() => getDetailImageList(detail.value))
 
@@ -150,60 +86,24 @@
     return (d.storage ?? d.storage_desc ?? '').trim() || '暂无说明'
   })
 
-  function applyMockForId(id: string) {
-    const m = MOCK_BY_ID[id] ?? { ...DEFAULT_MOCK, id }
-    detail.value = m
-    loadError.value = ''
-  }
-
-  async function fetchGoodsDetail(id: string): Promise<GoodDetail | null> {
-    // #ifdef MP-WEIXIN
-    return new Promise((resolve, reject) => {
-      wx.cloud.callFunction({
-        name: 'goods',
-        data: { id },
-        success(res) {
-          const result = res.result as GoodsDetailCloudResult
-          if (result?.success && result.data) {
-            resolve(result.data)
-          }
-          else {
-            reject(new Error('未找到商品或云函数异常'))
-          }
-        },
-        fail(err) {
-          reject(err)
-        },
-      })
-    })
-    // #endif
-
-    // #ifndef MP-WEIXIN
-    return Promise.resolve(null)
-    // #endif
-  }
-
   async function loadDetail(id: string) {
     if (!id) {
       loading.value = false
       loadError.value = '缺少商品 id'
-      applyMockForId('mock-1')
       return
     }
     loading.value = true
     loadError.value = ''
     try {
-      const data = await fetchGoodsDetail(id)
-      if (data) {
-        detail.value = data
-      }
-      else {
-        applyMockForId(id)
-      }
-    } catch (e) {
+      const data = await getUserGoodsDetail(id)
+      detail.value = data
+    }
+    catch (e) {
       console.error(e)
-      applyMockForId(id)
-    } finally {
+      detail.value = null
+      loadError.value = e instanceof Error ? e.message : '商品不存在或已下架'
+    }
+    finally {
       loading.value = false
     }
   }
@@ -220,6 +120,10 @@
     const d = detail.value
     if (!d) {
       uni.showToast({ title: '商品加载中', icon: 'none' })
+      return
+    }
+    if (!canPurchase.value) {
+      uni.showToast({ title: '商品已下架或售罄', icon: 'none' })
       return
     }
     const id = String(d._id ?? d.id ?? goodsId.value)
@@ -245,6 +149,10 @@
       uni.showToast({ title: '商品加载中', icon: 'none' })
       return
     }
+    if (!canPurchase.value) {
+      uni.showToast({ title: '商品已下架或售罄', icon: 'none' })
+      return
+    }
     const id = encodeURIComponent(String(d._id ?? d.id ?? goodsId.value))
     uni.navigateTo({
       url: `/pages/order/confirm?id=${id}&qty=1`,
@@ -259,6 +167,10 @@
   <view class="page" :style="pageRootStyle">
     <view v-if="loading" class="state">
       <text class="state-text">加载中…</text>
+    </view>
+
+    <view v-else-if="!detail" class="state">
+      <text class="state-text">{{ loadError || '商品不存在或已下架' }}</text>
     </view>
 
     <scroll-view v-else class="scroll" scroll-y :enhanced="true" :show-scrollbar="false">
@@ -310,12 +222,20 @@
       <view class="scroll-spacer" />
     </scroll-view>
 
-    <view class="bottom-bar">
-      <view class="btn btn-cart" @tap="addToCart">
-        <text class="btn-text btn-text-dark">加入购物车</text>
+    <view v-if="detail" class="bottom-bar">
+      <view
+        class="btn btn-cart"
+        :class="{ disabled: !canPurchase }"
+        @tap="addToCart"
+      >
+        <text class="btn-text btn-text-dark">{{ canPurchase ? '加入购物车' : '已下架' }}</text>
       </view>
-      <view class="btn btn-buy" @tap="buyNow">
-        <text class="btn-text">立即下单</text>
+      <view
+        class="btn btn-buy"
+        :class="{ disabled: !canPurchase }"
+        @tap="buyNow"
+      >
+        <text class="btn-text">{{ canPurchase ? '立即下单' : '暂不可购' }}</text>
       </view>
     </view>
   </view>
@@ -506,6 +426,10 @@
         .btn-text {
           color: #ffffff;
         }
+      }
+
+      &.disabled {
+        opacity: 0.45;
       }
     }
   }
