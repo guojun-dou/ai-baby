@@ -55,6 +55,11 @@ export default defineManifestConfig({
     appid: 'wx1e5dfdb6e56d0eab',
     setting: {
       urlCheck: false,
+      es6: true,
+      postcss: true,
+      minified: true, // 上传时压缩 JS
+      minifyWXML: true,
+      minifyWXSS: true,
     },
     usingComponents: true,
     darkmode: true,
