@@ -181,6 +181,23 @@ function mapOrderRow(doc) {
   }
 }
 
+/** 东八区今日 00:00:00 */
+function getChinaTodayStart() {
+  const offset = 8 * 60 * 60 * 1000
+  const shNow = new Date(Date.now() + offset)
+  return new Date(
+    Date.UTC(
+      shNow.getUTCFullYear(),
+      shNow.getUTCMonth(),
+      shNow.getUTCDate(),
+      0,
+      0,
+      0,
+      0,
+    ) - offset,
+  )
+}
+
 /**
  * @param {Record<string, unknown>} event
  */
@@ -199,17 +216,33 @@ exports.main = async (event = {}) => {
     )
     const statusRaw =
       event.status != null ? String(event.status).trim() : 'all'
+    const dateFilterRaw =
+      event.dateFilter != null ? String(event.dateFilter).trim() : 'all'
 
     const _ = db.command
-    let where = {}
+    const conditions = []
 
     if (statusRaw !== '' && statusRaw !== 'all') {
       const code = normalizeStatusCode(
         Number.isFinite(Number(statusRaw)) ? Number(statusRaw) : statusRaw,
       )
-      where = {
+      conditions.push({
         status: _.in(statusCodeToDbValues(code)),
-      }
+      })
+    }
+
+    if (dateFilterRaw === 'today') {
+      conditions.push({
+        createTime: _.gte(getChinaTodayStart()),
+      })
+    }
+
+    let where = {}
+    if (conditions.length === 1) {
+      where = conditions[0]
+    }
+    else if (conditions.length > 1) {
+      where = _.and(conditions)
     }
 
     const skip = (page - 1) * pageSize

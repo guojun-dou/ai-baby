@@ -57,6 +57,9 @@ export const ADMIN_ORDER_ACTION_STATUSES: AdminOrderStatusCode[] = [1, 2, 3, 4]
 /** 列表筛选项：all 或状态码 */
 export type AdminOrderStatusFilter = 'all' | `${AdminOrderStatusCode}`
 
+/** 订单日期筛选 */
+export type AdminOrderDateFilter = 'all' | 'today'
+
 /** 管理端订单列表单项 */
 export interface AdminOrderListItem {
   _id: string
@@ -72,6 +75,8 @@ export interface AdminOrderListParams {
   page?: number
   pageSize?: number
   status?: AdminOrderStatusFilter
+  /** today：仅今日创建的订单 */
+  dateFilter?: AdminOrderDateFilter
 }
 
 export interface AdminOrderListData {

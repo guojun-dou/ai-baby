@@ -10,13 +10,13 @@
   import { usePageLoading } from '@/composables/usePageLoading'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
   import { useCartStore } from '@/stores/cart'
-  import { withUniLoading } from '@/utils/uni-loading'
   import {
     fetchCloudTempUrlMap,
     isCloudFileId,
     resolveImageSrcForDisplay,
   } from '@/utils/cloud-file'
   import { getGoodsCover, getGoodsTitle } from '@/utils/goods-fields'
+  import { withUniLoading } from '@/utils/uni-loading'
 
   interface OrdersCreateCloudResult {
     success?: boolean
@@ -144,8 +144,7 @@
       try {
         const data = await getUserGoodsDetail(id)
         buyNowLines.value = [goodToLine(data, id, qty)]
-      }
-      catch (e) {
+      } catch (e) {
         console.error(e)
         applyBuyNowMock(id, qty)
       }
@@ -236,7 +235,7 @@
   function openSubmitSuccessModal() {
     uni.showModal({
       title: '提交成功',
-      content: `订单合计 ${totalText.value}，请联系客服进行支付和配送。`,
+      content: `订单合计 ${totalText.value}，商家将在确认订单后与您联系，请保持联系方式畅通。`,
       showCancel: false,
       success() {
         if (mode.value === 'cart') {
@@ -327,10 +326,7 @@
 
 <template>
   <view class="page" :style="pageRootStyle">
-    <PageLoading
-      :show="showBuyNowLoading"
-      text="加载商品…"
-    />
+    <PageLoading :show="showBuyNowLoading" text="加载商品…" />
 
     <template v-if="!showBuyNowLoading">
       <view v-if="displayLines.length === 0" class="empty">

@@ -19,3 +19,10 @@ export interface AdminCloudResponse<T = unknown> {
   message: string
   data: T | null
 }
+
+/** 管理端首页统计数据 */
+export interface DashboardData {
+  todayOrderCount: number
+  deliveryCount: number
+  goodsCount: number
+}

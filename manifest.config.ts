@@ -1,12 +1,12 @@
 import { defineManifestConfig } from '@uni-helper/vite-plugin-uni-manifest'
 
 export default defineManifestConfig({
-  'name': '',
-  'appid': '',
-  'description': '',
-  'versionName': '1.0.0',
-  'versionCode': '100',
-  'transformPx': false,
+  name: '',
+  appid: '',
+  description: '',
+  versionName: '1.0.0',
+  versionCode: '100',
+  transformPx: false,
   /* 5+App特有相关 */
   'app-plus': {
     usingComponents: true,
@@ -49,7 +49,7 @@ export default defineManifestConfig({
     },
   },
   /* 快应用特有相关 */
-  'quickapp': {},
+  quickapp: {},
   /* 小程序特有相关 */
   'mp-weixin': {
     appid: 'wx1e5dfdb6e56d0eab',
@@ -59,7 +59,8 @@ export default defineManifestConfig({
     usingComponents: true,
     darkmode: true,
     themeLocation: 'theme.json',
-    cloudfunctionRoot: "cloudfunctions/"
+    cloudfunctionRoot: 'cloudfunctions/',
+    lazyCodeLoading: 'requiredComponents',
   },
   'mp-alipay': {
     usingComponents: true,
@@ -70,12 +71,12 @@ export default defineManifestConfig({
   'mp-toutiao': {
     usingComponents: true,
   },
-  'h5': {
+  h5: {
     darkmode: true,
     themeLocation: 'theme.json',
   },
-  'uniStatistics': {
+  uniStatistics: {
     enable: false,
   },
-  'vueVersion': '3',
+  vueVersion: '3',
 })

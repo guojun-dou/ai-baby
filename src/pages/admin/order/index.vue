@@ -1,6 +1,6 @@
 <script setup lang="ts">
-  import type { AdminOrderListItem, AdminOrderStatusFilter } from '@/types/order-admin'
-  import { onPullDownRefresh } from '@dcloudio/uni-app'
+  import type { AdminOrderDateFilter, AdminOrderListItem, AdminOrderStatusFilter } from '@/types/order-admin'
+  import { onLoad, onPullDownRefresh } from '@dcloudio/uni-app'
   import { computed, ref, watch } from 'vue'
 
   import { getAdminOrderList } from '@/api/order'
@@ -30,6 +30,7 @@
   const { pageLoading, loadingMore, isCurrent, runReset, runMore } = usePagedLoading()
 
   const activeTab = ref<AdminOrderStatusFilter>('all')
+  const dateFilter = ref<AdminOrderDateFilter>('all')
   const list = ref<AdminOrderListItem[]>([])
   const page = ref(1)
   const hasMore = ref(true)
@@ -42,6 +43,28 @@
     () => pageLoading.loading.value && list.value.length > 0,
   )
   const showAuthLoading = computed(() => authLoading.value && !canAccess.value)
+  const showTodayBanner = computed(() => dateFilter.value === 'today')
+
+  function parseStatusFilter(raw: unknown): AdminOrderStatusFilter | null {
+    const s = raw != null ? String(raw).trim() : ''
+    if (s === 'all' || s === '') {
+      return 'all'
+    }
+    if (s === '0' || s === '1' || s === '2' || s === '3' || s === '4') {
+      return s
+    }
+    return null
+  }
+
+  onLoad((options) => {
+    const status = parseStatusFilter(options?.status)
+    if (status != null) {
+      activeTab.value = status
+    }
+    if (options?.filter === 'today') {
+      dateFilter.value = 'today'
+    }
+  })
 
   function formatPrice(price: number) {
     return `¥${price.toFixed(2)}`
@@ -95,6 +118,7 @@
             page: 1,
             pageSize: PAGE_SIZE,
             status: activeTab.value,
+            dateFilter: dateFilter.value,
           })
 
           if (!isCurrent(id)) {
@@ -121,6 +145,7 @@
         page: page.value + 1,
         pageSize: PAGE_SIZE,
         status: activeTab.value,
+        dateFilter: dateFilter.value,
       })
 
       list.value = [...list.value, ...data.list]
@@ -153,6 +178,14 @@
     void fetchPage(true)
   }
 
+  function clearTodayFilter() {
+    if (dateFilter.value === 'all') {
+      return
+    }
+    dateFilter.value = 'all'
+    void fetchPage(true)
+  }
+
   function onLoadMore() {
     void fetchPage(false)
   }
@@ -171,6 +204,11 @@
   <view v-if="canAccess" class="page" :style="pageRootStyle">
     <view class="header">
       <text class="header-title">订单管理</text>
+    </view>
+
+    <view v-if="showTodayBanner" class="filter-banner">
+      <text class="filter-banner-text">今日订单</text>
+      <text class="filter-banner-clear" @tap="clearTodayFilter">清除筛选</text>
     </view>
 
     <scroll-view class="tabs" scroll-x :show-scrollbar="false">
@@ -288,6 +326,29 @@
         font-size: 34rpx;
         font-weight: 600;
         color: $text-color;
+      }
+    }
+
+    .filter-banner {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0 $page-padding 16rpx;
+      padding: 16rpx 20rpx;
+      background-color: rgba($primary-color, 0.1);
+      border-radius: $radius-sm;
+      flex-shrink: 0;
+
+      .filter-banner-text {
+        font-size: 26rpx;
+        color: $primary-color;
+        font-weight: 500;
+      }
+
+      .filter-banner-clear {
+        font-size: 24rpx;
+        color: $text-secondary;
       }
     }
 

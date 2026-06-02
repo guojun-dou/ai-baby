@@ -1,24 +1,13 @@
 <script setup lang="ts">
   import { onPullDownRefresh, onShow } from '@dcloudio/uni-app'
-  import { computed, ref } from 'vue'
+  import { computed, ref, watch } from 'vue'
 
+  import { getDashboardData } from '@/api/admin'
+  import type { DashboardData } from '@/types/admin'
   import PageLoading from '@/components/PageLoading/index.vue'
   import { useAdmin } from '@/composables/useAdmin'
   import { usePageLoading } from '@/composables/usePageLoading'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
-
-  /** 管理首页统计（后续由 admin 云函数替换） */
-  interface AdminDashboardStats {
-    todayOrders: number
-    pendingDelivery: number
-    goodsTotal: number
-  }
-
-  const MOCK_STATS: AdminDashboardStats = {
-    todayOrders: 12,
-    pendingDelivery: 5,
-    goodsTotal: 36,
-  }
 
   const QUICK_ENTRIES = [
     {
@@ -37,11 +26,18 @@
     },
   ]
 
+  const EMPTY_STATS: DashboardData = {
+    todayOrderCount: 0,
+    deliveryCount: 0,
+    goodsCount: 0,
+  }
+
   const { pageRootStyle } = usePageRootStyle()
   const { canAccess, adminName, loading: authLoading } = useAdmin()
   const pageLoading = usePageLoading()
 
-  const stats = ref<AdminDashboardStats>({ ...MOCK_STATS })
+  const stats = ref<DashboardData>({ ...EMPTY_STATS })
+  const loadError = ref('')
 
   const showAuthLoading = computed(() => authLoading.value && !canAccess.value)
   const showStatsLoading = computed(() => pageLoading.loading.value)
@@ -50,17 +46,30 @@
     if (!canAccess.value) {
       return
     }
+    loadError.value = ''
     await pageLoading.run(async () => {
       try {
-        // 后续接入云函数：await fetchAdminDashboardStats()
-        stats.value = { ...MOCK_STATS }
+        stats.value = await getDashboardData()
       }
       catch (e) {
         console.error(e)
-        stats.value = { ...MOCK_STATS }
+        stats.value = { ...EMPTY_STATS }
+        const msg = e instanceof Error ? e.message : '统计数据加载失败'
+        loadError.value = msg
+        uni.showToast({ title: msg.length > 16 ? `${msg.slice(0, 13)}…` : msg, icon: 'none' })
       }
-    }, { silent: true })
+    })
   }
+
+  watch(
+    canAccess,
+    (val) => {
+      if (val) {
+        void loadStats()
+      }
+    },
+    { immediate: true },
+  )
 
   onShow(() => {
     if (canAccess.value) {
@@ -82,6 +91,18 @@
       },
     })
   }
+
+  function goTodayOrders() {
+    go('/pages/admin/order/index?filter=today')
+  }
+
+  function goDeliveryOrders() {
+    go('/pages/admin/order/index?status=2')
+  }
+
+  function goGoodsList() {
+    go('/pages/admin/goods/index')
+  }
 </script>
 
 <template>
@@ -91,26 +112,43 @@
       <text class="header-sub">你好，{{ adminName || '管理员' }}</text>
     </view>
 
+    <view v-if="loadError" class="error-bar">
+      <text class="error-text">{{ loadError }}</text>
+      <text class="error-retry" @tap="loadStats">重试</text>
+    </view>
+
     <view class="stats">
-      <view class="stat-card">
+      <view
+        class="stat-card"
+        hover-class="stat-card-hover"
+        @tap="goTodayOrders"
+      >
         <view class="stat-icon-wrap">
           <uni-icons type="calendar" :size="22" color="#ff8ba7" />
         </view>
-        <text class="stat-num">{{ showStatsLoading ? '—' : stats.todayOrders }}</text>
+        <text class="stat-num">{{ showStatsLoading ? '—' : stats.todayOrderCount }}</text>
         <text class="stat-label">今日订单</text>
       </view>
-      <view class="stat-card">
+      <view
+        class="stat-card"
+        hover-class="stat-card-hover"
+        @tap="goDeliveryOrders"
+      >
         <view class="stat-icon-wrap">
           <uni-icons type="paperplane" :size="22" color="#ff8ba7" />
         </view>
-        <text class="stat-num">{{ showStatsLoading ? '—' : stats.pendingDelivery }}</text>
+        <text class="stat-num">{{ showStatsLoading ? '—' : stats.deliveryCount }}</text>
         <text class="stat-label">待配送</text>
       </view>
-      <view class="stat-card">
+      <view
+        class="stat-card"
+        hover-class="stat-card-hover"
+        @tap="goGoodsList"
+      >
         <view class="stat-icon-wrap">
           <uni-icons type="shop" :size="22" color="#ff8ba7" />
         </view>
-        <text class="stat-num">{{ showStatsLoading ? '—' : stats.goodsTotal }}</text>
+        <text class="stat-num">{{ showStatsLoading ? '—' : stats.goodsCount }}</text>
         <text class="stat-label">商品总数</text>
       </view>
     </view>
@@ -186,6 +224,30 @@
       }
     }
 
+    .error-bar {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0 $page-padding 20rpx;
+      padding: 16rpx 20rpx;
+      background-color: rgba($primary-color, 0.08);
+      border-radius: $radius-sm;
+
+      .error-text {
+        flex: 1;
+        font-size: 24rpx;
+        color: $text-secondary;
+      }
+
+      .error-retry {
+        flex-shrink: 0;
+        margin-left: 16rpx;
+        font-size: 24rpx;
+        color: $primary-color;
+      }
+    }
+
     .stats {
       display: flex;
       flex-direction: row;
@@ -225,6 +287,10 @@
           font-size: 24rpx;
           color: $text-secondary;
         }
+      }
+
+      .stat-card-hover {
+        opacity: 0.92;
       }
     }
 
@@ -324,15 +390,11 @@
     }
   }
 
-  .page-loading {
+  .auth-page {
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: #fff7f9;
-
-    .loading-text {
-      font-size: 28rpx;
-      color: $text-secondary;
-    }
   }
 </style>

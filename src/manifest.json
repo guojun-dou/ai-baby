@@ -55,7 +55,8 @@
     "usingComponents": true,
     "darkmode": true,
     "themeLocation": "theme.json",
-    "cloudfunctionRoot": "cloudfunctions/"
+    "cloudfunctionRoot": "cloudfunctions/",
+    "lazyCodeLoading": "requiredComponents"
   },
   "mp-alipay": {
     "usingComponents": true

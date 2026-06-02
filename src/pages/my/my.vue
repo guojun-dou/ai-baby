@@ -61,9 +61,9 @@
 
   function showAbout() {
     uni.showModal({
-      title: '关于 AI-Baby',
+      title: '关于 芳芳爱心辅食',
       content:
-        'AI-Baby 专注母婴辅食与好物推荐，用温柔简洁的体验，陪伴宝宝每一口成长。\n\n版本：1.0.0',
+        '芳芳爱心辅食 专注母婴辅食与好物推荐，用温柔简洁的体验，陪伴宝宝每一口成长。\n\n版本：1.0.0',
       showCancel: false,
     })
   }
@@ -152,7 +152,7 @@
     </view>
 
     <view class="footer-hint">
-      <text class="hint-text">AI-Baby · 温柔之选</text>
+      <text class="hint-text">芳芳爱心辅食 · 温柔之选</text>
     </view>
   </view>
 </template>

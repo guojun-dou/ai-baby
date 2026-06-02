@@ -162,6 +162,7 @@ export async function getAdminOrderList(
     page: params.page ?? 1,
     pageSize: params.pageSize ?? PAGE_SIZE,
     status: params.status ?? 'all',
+    dateFilter: params.dateFilter ?? 'all',
   }
 
   // #ifdef MP-WEIXIN
