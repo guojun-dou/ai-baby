@@ -7,6 +7,7 @@
   import EmptyState from '@/components/EmptyState.vue'
   import PageLoading from '@/components/PageLoading/index.vue'
   import { useAdmin } from '@/composables/useAdmin'
+  import { useFlexScrollHeight } from '@/composables/useFlexScrollHeight'
   import { usePagedLoading } from '@/composables/usePageLoading'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
   import {
@@ -26,8 +27,9 @@
   ] as const
 
   const { pageRootStyle } = usePageRootStyle()
-  const { canAccess, loading: authLoading } = useAdmin()
+  const { canAccess, showAuthLoading } = useAdmin()
   const { pageLoading, loadingMore, isCurrent, runReset, runMore } = usePagedLoading()
+  const { scrollStyle } = useFlexScrollHeight({ topOffsetRpx: 300, bottomOffsetRpx: 24 })
 
   const activeTab = ref<AdminOrderStatusFilter>('all')
   const dateFilter = ref<AdminOrderDateFilter>('all')
@@ -42,7 +44,6 @@
   const showRefreshOverlay = computed(
     () => pageLoading.loading.value && list.value.length > 0,
   )
-  const showAuthLoading = computed(() => authLoading.value && !canAccess.value)
   const showTodayBanner = computed(() => dateFilter.value === 'today')
 
   function parseStatusFilter(raw: unknown): AdminOrderStatusFilter | null {
@@ -251,6 +252,7 @@
         class="scroll"
         scroll-y
         :show-scrollbar="false"
+        :style="scrollStyle"
         @scrolltolower="onLoadMore"
       >
       <view
@@ -426,8 +428,6 @@
     }
 
     .scroll {
-      flex: 1;
-      height: 0;
       width: 100%;
       padding: 0 $page-padding;
       box-sizing: border-box;

@@ -171,7 +171,7 @@
       <text class="state-text">{{ loadError || '商品不存在或已下架' }}</text>
     </view>
 
-    <scroll-view v-else-if="detail" class="scroll" scroll-y :enhanced="true" :show-scrollbar="false">
+    <view v-else-if="detail" class="body">
       <view class="swiper-wrap">
         <swiper
           v-if="swiperDisplayUrls.length > 0"
@@ -218,7 +218,7 @@
       </view>
 
       <view class="scroll-spacer" />
-    </scroll-view>
+    </view>
 
     <view v-if="detail" class="bottom-bar">
       <view
@@ -255,15 +255,13 @@
   min-height: 100vh;
   background-color: $page-bg;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
+  padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
 
   .state {
-    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: $page-padding;
+    padding: 80rpx $page-padding;
 
     .state-text {
       font-size: 28rpx;
@@ -271,9 +269,8 @@
     }
   }
 
-  .scroll {
-    flex: 1;
-    height: 0;
+  .body {
+    width: 100%;
   }
 
   .swiper-wrap {

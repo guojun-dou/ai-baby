@@ -15,6 +15,7 @@
 }
 
 /* --status-bar-height 由 layout store 写入各页根节点 .page 的 :style（见 stores/layout.ts） */
+/* 页面内 scroll-view 勿单独使用 flex:1 + height:0，iOS 会塌陷；请用 useFlexScrollHeight */
 .page {
   min-height: 100vh;
   background: $page-bg;

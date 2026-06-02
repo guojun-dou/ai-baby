@@ -7,6 +7,7 @@
   import EmptyState from '@/components/EmptyState.vue'
   import PageLoading from '@/components/PageLoading/index.vue'
   import SubmitBar from '@/components/SubmitBar.vue'
+  import { useFlexScrollHeight } from '@/composables/useFlexScrollHeight'
   import { usePageLoading } from '@/composables/usePageLoading'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
 
@@ -19,6 +20,7 @@
 
   const { pageRootStyle } = usePageRootStyle()
   const pageLoading = usePageLoading()
+  const { scrollStyle } = useFlexScrollHeight({ topOffsetRpx: 24, bottomOffsetRpx: 180 })
 
   const cart = useCartStore()
   const { cartList, totalPrice, totalCount } = storeToRefs(cart)
@@ -157,7 +159,7 @@
       </EmptyState>
     </view>
 
-    <scroll-view v-else class="scroll" scroll-y :show-scrollbar="false">
+    <scroll-view v-else class="scroll" scroll-y :show-scrollbar="false" :style="scrollStyle">
       <view v-for="item in cartList" :key="item._id" class="card">
         <image
           v-if="item.cover"
@@ -252,12 +254,11 @@
       opacity: 0.9;
     }
 
-    .scroll {
-      flex: 1;
-      height: 0;
-      padding: $card-gap $page-padding 0;
-      box-sizing: border-box;
-    }
+  .scroll {
+    width: 100%;
+    padding: $card-gap $page-padding 0;
+    box-sizing: border-box;
+  }
 
     .card {
       display: flex;

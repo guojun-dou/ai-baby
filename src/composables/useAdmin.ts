@@ -56,6 +56,11 @@ export function useAdmin(options: UseAdminOptions = {}) {
   }
 
   const canAccess = computed(() => ready.value && isAdmin.value)
+  /** 权限校验完成前展示 loading，避免 iOS 上出现空白页 */
+  const guardPending = computed(() => pageGuard && !ready.value)
+  const showAuthLoading = computed(
+    () => guardPending.value || (loading.value && !canAccess.value),
+  )
 
   return {
     isAdmin,
@@ -63,6 +68,7 @@ export function useAdmin(options: UseAdminOptions = {}) {
     adminName,
     ready,
     canAccess,
+    showAuthLoading,
     refresh,
     ensureAdmin,
     redirectHome,

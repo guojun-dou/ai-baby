@@ -8,6 +8,7 @@
   import EmptyState from '@/components/EmptyState.vue'
   import GoodsCard from '@/components/GoodsCard.vue'
   import PageLoading from '@/components/PageLoading/index.vue'
+  import { useFlexScrollHeight } from '@/composables/useFlexScrollHeight'
   import { usePagedLoading } from '@/composables/usePageLoading'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
   import {
@@ -35,6 +36,7 @@
 
   const { pageRootStyle } = usePageRootStyle()
   const { pageLoading, loadingMore, isCurrent, runReset, runMore } = usePagedLoading()
+  const { scrollStyle } = useFlexScrollHeight({ topOffsetRpx: 360, bottomOffsetRpx: 24 })
 
   const list = ref<GoodItem[]>([])
   const hasMore = ref(false)
@@ -229,6 +231,7 @@
         class="scroll"
         scroll-y
         :show-scrollbar="false"
+        :style="scrollStyle"
         lower-threshold="120"
         @scrolltolower="onScrollToLower"
       >
@@ -407,16 +410,13 @@
     }
 
     .scroll-wrap {
-      flex: 1;
-      height: 0;
       position: relative;
-      display: flex;
-      flex-direction: column;
+      flex: 1;
+      min-height: 0;
     }
 
     .scroll {
-      flex: 1;
-      height: 0;
+      width: 100%;
     }
 
     .grid-wrap {

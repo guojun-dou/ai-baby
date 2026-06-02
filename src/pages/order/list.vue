@@ -7,6 +7,7 @@
   import { getUserOrderList } from '@/api/order'
   import EmptyState from '@/components/EmptyState.vue'
   import PageLoading from '@/components/PageLoading/index.vue'
+  import { useFlexScrollHeight } from '@/composables/useFlexScrollHeight'
   import { usePagedLoading } from '@/composables/usePageLoading'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
   import {
@@ -28,6 +29,7 @@
 
   const { pageRootStyle } = usePageRootStyle()
   const { pageLoading, loadingMore, isCurrent, runReset, runMore } = usePagedLoading()
+  const { scrollStyle } = useFlexScrollHeight({ topOffsetRpx: 220, bottomOffsetRpx: 24 })
 
   const orders = ref<UserOrderRecord[]>([])
   const hasMore = ref(false)
@@ -189,6 +191,7 @@
         class="scroll"
         scroll-y
         :show-scrollbar="false"
+        :style="scrollStyle"
         lower-threshold="120"
         @scrolltolower="onScrollToLower"
       >
@@ -324,8 +327,7 @@
   }
 
   .scroll {
-    flex: 1;
-    height: 0;
+    width: 100%;
     padding: $card-gap $page-padding 0;
     box-sizing: border-box;
   }

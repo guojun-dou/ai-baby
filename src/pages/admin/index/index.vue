@@ -33,13 +33,12 @@
   }
 
   const { pageRootStyle } = usePageRootStyle()
-  const { canAccess, adminName, loading: authLoading } = useAdmin()
+  const { canAccess, adminName, showAuthLoading } = useAdmin()
   const pageLoading = usePageLoading()
 
   const stats = ref<DashboardData>({ ...EMPTY_STATS })
   const loadError = ref('')
 
-  const showAuthLoading = computed(() => authLoading.value && !canAccess.value)
   const showStatsLoading = computed(() => pageLoading.loading.value)
 
   async function loadStats() {

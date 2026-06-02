@@ -21,7 +21,7 @@
   } from '@/utils/cloud-file'
 
   const { pageRootStyle } = usePageRootStyle()
-  const { canAccess, loading: authLoading } = useAdmin()
+  const { canAccess, showAuthLoading } = useAdmin()
   const pageLoading = usePageLoading()
 
   const orderId = ref('')
@@ -29,7 +29,6 @@
   const loadError = ref('')
   const coverUrlMap = ref<Record<string, string>>({})
 
-  const showAuthLoading = computed(() => authLoading.value && !canAccess.value)
   const showDetailLoading = computed(() => pageLoading.loading.value)
 
   const nextStatuses = computed(() => {
@@ -176,7 +175,7 @@
       </view>
     </view>
 
-    <scroll-view v-else class="scroll" scroll-y :show-scrollbar="false">
+    <view v-else class="body">
       <view class="head-card">
         <view class="head-row">
           <text class="order-id">订单 {{ detail._id }}</text>
@@ -263,7 +262,7 @@
       </view>
 
       <view class="scroll-spacer" />
-    </scroll-view>
+    </view>
   </view>
 
   <view v-else-if="showAuthLoading" class="page auth-page" :style="pageRootStyle">
@@ -285,8 +284,7 @@
     min-height: 100vh;
     background-color: #fff7f9;
     box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+    padding-bottom: env(safe-area-inset-bottom);
 
     .state {
       flex: 1;
@@ -319,9 +317,7 @@
       }
     }
 
-    .scroll {
-      flex: 1;
-      height: 0;
+    .body {
       width: 100%;
       padding: 0 $page-padding;
       box-sizing: border-box;

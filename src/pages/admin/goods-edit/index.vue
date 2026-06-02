@@ -13,15 +13,16 @@
   const CATEGORIES = ['米粉', '果泥', '面条', '粥品', '零食', '其他'] as const
 
   const { pageRootStyle } = usePageRootStyle()
-  const { canAccess, loading: authLoading } = useAdmin()
+  const { canAccess, showAuthLoading } = useAdmin()
   const pageLoading = usePageLoading()
 
   const goodsId = ref('')
   const pageTitle = ref('新增商品')
   const saving = ref(false)
 
-  const showAuthLoading = computed(() => authLoading.value && !canAccess.value)
-  const showDetailLoading = computed(() => pageLoading.loading.value)
+  const showDetailLoading = computed(
+    () => Boolean(goodsId.value) && pageLoading.loading.value,
+  )
 
   const form = reactive({
     title: '',
@@ -181,7 +182,7 @@
       text="加载商品…"
     />
 
-    <scroll-view v-else class="scroll" scroll-y :show-scrollbar="false">
+    <view v-show="!showDetailLoading" class="body">
       <view class="section">
         <text class="section-label">基本信息</text>
         <view class="card">
@@ -300,9 +301,9 @@
       </view>
 
       <view class="scroll-spacer" />
-    </scroll-view>
+    </view>
 
-    <view v-if="!showDetailLoading" class="bottom-bar">
+    <view v-show="!showDetailLoading" class="bottom-bar">
       <view class="submit" hover-class="submit-hover" @tap="onSave">
         <text class="submit-text">{{ saving ? '保存中…' : '保存商品' }}</text>
       </view>
@@ -328,12 +329,10 @@
     min-height: 100vh;
     background-color: #fff7f9;
     box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+    padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
 
     .header {
       padding: 0 $page-padding 20rpx;
-      flex-shrink: 0;
 
       .header-title {
         font-size: 34rpx;
@@ -342,22 +341,7 @@
       }
     }
 
-    .loading-wrap {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      .loading-text {
-        font-size: 28rpx;
-        color: $text-secondary;
-      }
-    }
-
-    .scroll {
-      flex: 1;
-      height: 0;
-      width: 100%;
+    .body {
       padding: 0 $page-padding;
       box-sizing: border-box;
 
@@ -481,7 +465,7 @@
       }
 
       .scroll-spacer {
-        height: calc(140rpx + env(safe-area-inset-bottom));
+        height: 32rpx;
       }
     }
 
@@ -518,15 +502,11 @@
     }
   }
 
-  .page-loading {
+  .auth-page {
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: #fff7f9;
-
-    .loading-text {
-      font-size: 28rpx;
-      color: $text-secondary;
-    }
   }
 </style>
