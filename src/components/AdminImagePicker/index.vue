@@ -7,6 +7,7 @@
     resolveImageSrcForDisplay,
   } from '@/utils/cloud-file'
   import { uploadGoodsImages } from '@/utils/cloud-upload'
+  import { withUniLoading } from '@/utils/uni-loading'
 
   defineOptions({
     name: 'AdminImagePicker',
@@ -68,8 +69,7 @@
           return
         }
         uploading.value = true
-        uni.showLoading({ title: '上传中…', mask: true })
-        void uploadGoodsImages(paths)
+        void withUniLoading(() => uploadGoodsImages(paths), '上传中…')
           .then((fileIds) => {
             imageIds.value = [...list, ...fileIds]
           })
@@ -79,7 +79,6 @@
           })
           .finally(() => {
             uploading.value = false
-            uni.hideLoading()
           })
       },
     })

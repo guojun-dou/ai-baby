@@ -1,24 +1,30 @@
 <script setup lang="ts">
 import { onShow } from '@dcloudio/uni-app'
 import { storeToRefs } from 'pinia'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import { checkCartGoods } from '@/api/goods'
 import EmptyState from '@/components/EmptyState.vue'
-import { usePageRootStyle } from '@/composables/usePageRootStyle'
+import PageLoading from '@/components/PageLoading/index.vue'
 import SubmitBar from '@/components/SubmitBar.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
+import { usePageRootStyle } from '@/composables/usePageRootStyle'
 
 import { useCartStore } from '@/stores/cart'
 import { fetchCloudTempUrlMap, isCloudFileId, resolveImageSrcForDisplay } from '@/utils/cloud-file'
 
 const { pageRootStyle } = usePageRootStyle()
+const pageLoading = usePageLoading()
 
 const cart = useCartStore()
 const { cartList, totalPrice, totalCount } = storeToRefs(cart)
 
 const cartCoverUrlMap = ref<Record<string, string>>({})
 const invalidIds = ref<Set<string>>(new Set())
-const validating = ref(false)
+
+const showValidateOverlay = computed(
+  () => pageLoading.loading.value && cartList.value.length > 0,
+)
 
 function cartCoverDisplay(raw: string) {
   return resolveImageSrcForDisplay(raw, cartCoverUrlMap.value)
@@ -51,39 +57,37 @@ async function validateCartItems() {
     return
   }
 
-  validating.value = true
-  try {
-    const { items } = await checkCartGoods(ids)
-    const nextInvalid = new Set<string>()
-    const removedTitles: string[] = []
+  await pageLoading.run(async () => {
+    try {
+      const { items } = await checkCartGoods(ids)
+      const nextInvalid = new Set<string>()
+      const removedTitles: string[] = []
 
-    for (const row of items) {
-      if (!row.onSale || row.stock <= 0) {
-        nextInvalid.add(row._id)
-        cart.removeCart(row._id)
-        if (row.title) {
-          removedTitles.push(row.title)
+      for (const row of items) {
+        if (!row.onSale || row.stock <= 0) {
+          nextInvalid.add(row._id)
+          cart.removeCart(row._id)
+          if (row.title) {
+            removedTitles.push(row.title)
+          }
         }
       }
-    }
 
-    invalidIds.value = nextInvalid
+      invalidIds.value = nextInvalid
 
-    if (removedTitles.length > 0) {
-      uni.showToast({
-        title: removedTitles.length === 1
-          ? `${removedTitles[0]}已下架`
-          : `${removedTitles.length}件商品已失效`,
-        icon: 'none',
-      })
+      if (removedTitles.length > 0) {
+        uni.showToast({
+          title: removedTitles.length === 1
+            ? `${removedTitles[0]}已下架`
+            : `${removedTitles.length}件商品已失效`,
+          icon: 'none',
+        })
+      }
     }
-  }
-  catch (e) {
-    console.error(e)
-  }
-  finally {
-    validating.value = false
-  }
+    catch (e) {
+      console.error(e)
+    }
+  })
 }
 
 function formatLinePrice(price: number, count: number) {
@@ -118,7 +122,7 @@ function goCheckout() {
     uni.showToast({ title: '购物车是空的', icon: 'none' })
     return
   }
-  if (validating.value) {
+  if (pageLoading.busy.value) {
     uni.showToast({ title: '正在校验商品', icon: 'none' })
     return
   }
@@ -142,6 +146,13 @@ function goShopping() {
 
 <template>
   <view class="page" :style="pageRootStyle">
+    <PageLoading
+      :show="showValidateOverlay"
+      overlay
+      mask
+      text="校验商品中…"
+    />
+
     <view v-if="cartList.length === 0" class="empty-wrap">
       <EmptyState title="购物车还是空的" desc="挑几件好物给宝宝吧">
         <view class="empty-slot-btn" hover-class="empty-slot-btn-hover" @tap="goShopping">
@@ -235,6 +246,7 @@ function goShopping() {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  position: relative;
 
   .empty-wrap {
     flex: 1;

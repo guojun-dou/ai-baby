@@ -4,8 +4,11 @@
   import { computed, ref, watch } from 'vue'
 
   import { getAdminOrderDetail, updateOrderStatus } from '@/api/order'
+  import PageLoading from '@/components/PageLoading/index.vue'
   import { useAdmin } from '@/composables/useAdmin'
+  import { usePageLoading } from '@/composables/usePageLoading'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
+  import { withUniLoading } from '@/utils/uni-loading'
   import {
     ADMIN_ORDER_STATUS_COLOR,
     ADMIN_ORDER_STATUS_LABEL,
@@ -19,13 +22,15 @@
 
   const { pageRootStyle } = usePageRootStyle()
   const { canAccess, loading: authLoading } = useAdmin()
+  const pageLoading = usePageLoading()
 
   const orderId = ref('')
   const detail = ref<AdminOrderDetail | null>(null)
-  const detailLoading = ref(false)
   const loadError = ref('')
-  const updating = ref(false)
   const coverUrlMap = ref<Record<string, string>>({})
+
+  const showAuthLoading = computed(() => authLoading.value && !canAccess.value)
+  const showDetailLoading = computed(() => pageLoading.loading.value)
 
   const nextStatuses = computed(() => {
     if (!detail.value) {
@@ -88,22 +93,20 @@
     if (!orderId.value) {
       return
     }
-    detailLoading.value = true
     loadError.value = ''
-    try {
-      const data = await getAdminOrderDetail(orderId.value)
-      detail.value = data
-      coverUrlMap.value = {}
-      await syncCovers(data.goodsList)
-    }
-    catch (e) {
-      console.error(e)
-      loadError.value = '加载失败'
-      detail.value = null
-    }
-    finally {
-      detailLoading.value = false
-    }
+    await pageLoading.run(async () => {
+      try {
+        const data = await getAdminOrderDetail(orderId.value)
+        detail.value = data
+        coverUrlMap.value = {}
+        await syncCovers(data.goodsList)
+      }
+      catch (e) {
+        console.error(e)
+        loadError.value = '加载失败'
+        detail.value = null
+      }
+    })
   }
 
   onLoad((options) => {
@@ -121,7 +124,7 @@
   )
 
   function onStatusAction(target: AdminOrderStatusCode) {
-    if (!detail.value || updating.value) {
+    if (!detail.value || pageLoading.busy.value) {
       return
     }
     const label = ADMIN_ORDER_STATUS_LABEL[target]
@@ -132,12 +135,13 @@
         if (!res.confirm) {
           return
         }
-        updating.value = true
-        uni.showLoading({ title: '提交中…', mask: true })
-        void updateOrderStatus({
-          orderId: detail.value!._id,
-          status: target,
-        })
+        void withUniLoading(
+          () => updateOrderStatus({
+            orderId: detail.value!._id,
+            status: target,
+          }),
+          '提交中…',
+        )
           .then((result) => {
             if (detail.value) {
               detail.value.status = result.status
@@ -152,10 +156,6 @@
               icon: 'none',
             })
           })
-          .finally(() => {
-            updating.value = false
-            uni.hideLoading()
-          })
       },
     })
   }
@@ -163,9 +163,11 @@
 
 <template>
   <view v-if="canAccess" class="page" :style="pageRootStyle">
-    <view v-if="detailLoading" class="state">
-      <text class="state-text">加载中…</text>
-    </view>
+    <PageLoading
+      v-if="showDetailLoading"
+      :show="true"
+      text="加载中…"
+    />
 
     <view v-else-if="loadError || !detail" class="state">
       <text class="state-text">{{ loadError || '订单不存在' }}</text>
@@ -264,8 +266,8 @@
     </scroll-view>
   </view>
 
-  <view v-else-if="authLoading" class="page page-loading" :style="pageRootStyle">
-    <text class="loading-text">校验权限中…</text>
+  <view v-else-if="showAuthLoading" class="page auth-page" :style="pageRootStyle">
+    <PageLoading :show="true" text="校验权限中…" />
   </view>
 </template>
 

@@ -5,8 +5,12 @@
 
   import { storeToRefs } from 'pinia'
   import { computed, reactive, ref, watch } from 'vue'
+  import { getUserGoodsDetail } from '@/api/goods'
+  import PageLoading from '@/components/PageLoading/index.vue'
+  import { usePageLoading } from '@/composables/usePageLoading'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
   import { useCartStore } from '@/stores/cart'
+  import { withUniLoading } from '@/utils/uni-loading'
   import {
     fetchCloudTempUrlMap,
     isCloudFileId,
@@ -14,15 +18,10 @@
   } from '@/utils/cloud-file'
   import { getGoodsCover, getGoodsTitle } from '@/utils/goods-fields'
 
-  interface GoodsCloudResult {
-    success?: boolean
-    data?: GoodDetail | null
-  }
-
   interface OrdersCreateCloudResult {
     success?: boolean
     message?: string
-    data?: { orderId?: string; status?: string; totalPrice?: number }
+    data?: { orderId?: string; status?: number; totalPrice?: number }
   }
 
   const MOCK_BY_ID: Record<string, GoodDetail> = {
@@ -75,6 +74,8 @@
   const DEFAULT_MOCK = MOCK_BY_ID['mock-1']!
 
   const { pageRootStyle } = usePageRootStyle()
+  const pageLoading = usePageLoading()
+  const showBuyNowLoading = computed(() => pageLoading.loading.value)
 
   const cartStore = useCartStore()
   const { cartList } = storeToRefs(cartStore)
@@ -83,7 +84,6 @@
 
   const mode = ref<CheckoutMode>('cart')
   const buyNowLines = ref<CartItem[]>([])
-  const buyNowLoading = ref(false)
   const buyNowId = ref('')
   const buyNowQty = ref(1)
 
@@ -139,30 +139,17 @@
     }
   }
 
-  async function fetchGoods(id: string): Promise<GoodDetail | null> {
-    // #ifdef MP-WEIXIN
-    return new Promise((resolve, reject) => {
-      wx.cloud.callFunction({
-        name: 'goods',
-        data: { id },
-        success(res) {
-          const result = res.result as GoodsCloudResult
-          if (result?.success && result.data) {
-            resolve(result.data)
-          } else {
-            reject(new Error('fetch fail'))
-          }
-        },
-        fail(err) {
-          reject(err)
-        },
-      })
+  async function prepareBuyNow(id: string, qty: number) {
+    await pageLoading.run(async () => {
+      try {
+        const data = await getUserGoodsDetail(id)
+        buyNowLines.value = [goodToLine(data, id, qty)]
+      }
+      catch (e) {
+        console.error(e)
+        applyBuyNowMock(id, qty)
+      }
     })
-    // #endif
-
-    // #ifndef MP-WEIXIN
-    return Promise.resolve(null)
-    // #endif
   }
 
   function goodToLine(g: GoodDetail, id: string, qty: number): CartItem {
@@ -182,23 +169,6 @@
   function applyBuyNowMock(id: string, qty: number) {
     const m = MOCK_BY_ID[id] ?? { ...DEFAULT_MOCK, id }
     buyNowLines.value = [goodToLine(m, id, qty)]
-  }
-
-  async function prepareBuyNow(id: string, qty: number) {
-    buyNowLoading.value = true
-    try {
-      const data = await fetchGoods(id)
-      if (data) {
-        buyNowLines.value = [goodToLine(data, id, qty)]
-      } else {
-        applyBuyNowMock(id, qty)
-      }
-    } catch (e) {
-      console.error(e)
-      applyBuyNowMock(id, qty)
-    } finally {
-      buyNowLoading.value = false
-    }
   }
 
   onLoad((options) => {
@@ -311,7 +281,7 @@
   }
 
   function handleSubmit() {
-    if (buyNowLoading.value) {
+    if (pageLoading.busy.value) {
       uni.showToast({ title: '商品加载中', icon: 'none' })
       return
     }
@@ -326,14 +296,11 @@
     console.warn('[order confirm]', buildCreateOrderPayload())
 
     // #ifdef MP-WEIXIN
-    uni.showLoading({ title: '提交中…', mask: true })
-    void submitOrderMp()
+    void withUniLoading(() => submitOrderMp(), '提交中…')
       .then(() => {
-        uni.hideLoading()
         openSubmitSuccessModal()
       })
       .catch((e: unknown) => {
-        uni.hideLoading()
         console.error(e)
         const msg =
           e && typeof e === 'object' && 'message' in e && typeof (e as Error).message === 'string'
@@ -360,11 +327,12 @@
 
 <template>
   <view class="page" :style="pageRootStyle">
-    <view v-if="buyNowLoading" class="loading">
-      <text class="loading-text">加载商品…</text>
-    </view>
+    <PageLoading
+      :show="showBuyNowLoading"
+      text="加载商品…"
+    />
 
-    <template v-else>
+    <template v-if="!showBuyNowLoading">
       <view v-if="displayLines.length === 0" class="empty">
         <text class="empty-title">暂无可结算商品</text>
         <text class="empty-desc">请先加入购物车或从商品页立即下单</text>

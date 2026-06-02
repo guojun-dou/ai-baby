@@ -2,11 +2,14 @@
   import type { AdminGoodsListItem } from '@/types/goods-admin'
   import { onPullDownRefresh } from '@dcloudio/uni-app'
 
-  import { ref, watch } from 'vue'
+  import { computed, ref, watch } from 'vue'
   import { getAdminGoodsList, updateGoodsStatus } from '@/api/goods'
   import EmptyState from '@/components/EmptyState.vue'
+  import PageLoading from '@/components/PageLoading/index.vue'
   import { useAdmin } from '@/composables/useAdmin'
+  import { usePagedLoading } from '@/composables/usePageLoading'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
+  import { withUniLoading } from '@/utils/uni-loading'
   import {
     fetchCloudTempUrlMap,
     isCloudFileId,
@@ -17,15 +20,22 @@
 
   const { pageRootStyle } = usePageRootStyle()
   const { canAccess, loading: authLoading } = useAdmin()
+  const { pageLoading, loadingMore, isCurrent, runReset, runMore } = usePagedLoading()
 
   const keyword = ref('')
   const list = ref<AdminGoodsListItem[]>([])
   const page = ref(1)
   const hasMore = ref(true)
-  const loading = ref(false)
-  const loadingMore = ref(false)
   const loadError = ref('')
   const coverUrlMap = ref<Record<string, string>>({})
+
+  const showInitialLoading = computed(
+    () => pageLoading.loading.value && list.value.length === 0,
+  )
+  const showRefreshOverlay = computed(
+    () => pageLoading.loading.value && list.value.length > 0,
+  )
+  const showAuthLoading = computed(() => authLoading.value && !canAccess.value)
 
   function coverDisplay(raw: string) {
     return resolveImageSrcForDisplay(raw, coverUrlMap.value)
@@ -49,63 +59,63 @@
     return `¥${price.toFixed(2)}`
   }
 
-  async function fetchPage(reset: boolean) {
+  async function fetchPage(reset: boolean, opts?: { silent?: boolean }) {
     if (!canAccess.value) {
       return
     }
+
     if (reset) {
-      if (loading.value) {
-        return
-      }
-      loading.value = true
-      page.value = 1
-      hasMore.value = true
-      loadError.value = ''
-    }
-    else {
-      if (loadingMore.value || loading.value || !hasMore.value) {
-        return
-      }
-      loadingMore.value = true
+      await runReset(async (id) => {
+        page.value = 1
+        hasMore.value = true
+        loadError.value = ''
+
+        try {
+          const data = await getAdminGoodsList({
+            page: 1,
+            pageSize: PAGE_SIZE,
+            keyword: keyword.value.trim(),
+          })
+
+          if (!isCurrent(id)) {
+            return
+          }
+
+          list.value = data.list
+          coverUrlMap.value = {}
+          page.value = data.page
+          hasMore.value = data.hasMore
+          await syncCovers(data.list)
+        }
+        catch (e) {
+          console.error(e)
+          if (isCurrent(id)) {
+            loadError.value = '加载失败，请下拉重试'
+            list.value = []
+          }
+        }
+      }, { silent: opts?.silent, hasData: list.value.length > 0 })
+      return
     }
 
-    try {
-      const nextPage = reset ? 1 : page.value + 1
+    await runMore(async () => {
       const data = await getAdminGoodsList({
-        page: nextPage,
+        page: page.value + 1,
         pageSize: PAGE_SIZE,
         keyword: keyword.value.trim(),
       })
 
-      if (reset) {
-        list.value = data.list
-        coverUrlMap.value = {}
-      }
-      else {
-        list.value = [...list.value, ...data.list]
-      }
-
+      list.value = [...list.value, ...data.list]
       page.value = data.page
       hasMore.value = data.hasMore
       await syncCovers(data.list)
-    }
-    catch (e) {
-      console.error(e)
-      loadError.value = '加载失败，请下拉重试'
-      if (reset) {
-        list.value = []
-      }
-    }
-    finally {
-      loading.value = false
-      loadingMore.value = false
-    }
+    }, () => hasMore.value && !pageLoading.busy.value)
   }
 
   watch(
     canAccess,
     (val) => {
-      if (val && list.value.length === 0 && !loading.value) {
+      if (val && list.value.length === 0) {
         void fetchPage(true)
       }
     },
@@ -113,7 +123,7 @@
   )
 
   onPullDownRefresh(() => {
-    void fetchPage(true).finally(() => {
+    void fetchPage(true, { silent: list.value.length > 0 }).finally(() => {
       uni.stopPullDownRefresh()
     })
   })
@@ -139,22 +149,21 @@
   async function onToggleStatus(item: AdminGoodsListItem) {
     const nextStatus = item.status === 1 ? 0 : 1
     const label = nextStatus === 1 ? '上架' : '下架'
-    uni.showLoading({ title: `${label}中…`, mask: true })
     try {
-      await updateGoodsStatus({
-        goodsId: item._id,
-        action: 'status',
-        status: nextStatus,
-      })
+      await withUniLoading(
+        () => updateGoodsStatus({
+          goodsId: item._id,
+          action: 'status',
+          status: nextStatus,
+        }),
+        `${label}中…`,
+      )
       item.status = nextStatus
       uni.showToast({ title: `已${label}`, icon: 'success' })
     }
     catch (e) {
       console.error(e)
       uni.showToast({ title: '操作失败', icon: 'none' })
-    }
-    finally {
-      uni.hideLoading()
     }
   }
 
@@ -166,11 +175,13 @@
         if (!res.confirm) {
           return
         }
-        uni.showLoading({ title: '删除中…', mask: true })
-        void updateGoodsStatus({
-          goodsId: item._id,
-          action: 'delete',
-        })
+        void withUniLoading(
+          () => updateGoodsStatus({
+            goodsId: item._id,
+            action: 'delete',
+          }),
+          '删除中…',
+        )
           .then(() => {
             list.value = list.value.filter((g) => g._id !== item._id)
             uni.showToast({ title: '已删除', icon: 'success' })
@@ -178,9 +189,6 @@
           .catch((e: unknown) => {
             console.error(e)
             uni.showToast({ title: '删除失败', icon: 'none' })
-          })
-          .finally(() => {
-            uni.hideLoading()
           })
       },
     })
@@ -214,9 +222,11 @@
       </view>
     </view>
 
-    <view v-if="loading && !list.length" class="state">
-      <text class="state-text">加载中…</text>
-    </view>
+    <PageLoading
+      v-if="showInitialLoading"
+      :show="true"
+      text="加载中…"
+    />
 
     <view v-else-if="loadError && !list.length" class="state">
       <text class="state-text">{{ loadError }}</text>
@@ -233,13 +243,19 @@
       </EmptyState>
     </view>
 
-    <scroll-view
-      v-else
-      class="scroll"
-      scroll-y
-      :show-scrollbar="false"
-      @scrolltolower="onLoadMore"
-    >
+    <view v-else class="scroll-wrap">
+      <PageLoading
+        :show="showRefreshOverlay"
+        overlay
+        mask
+        text="刷新中…"
+      />
+      <scroll-view
+        class="scroll"
+        scroll-y
+        :show-scrollbar="false"
+        @scrolltolower="onLoadMore"
+      >
       <view
         v-for="item in list"
         :key="item._id"
@@ -295,11 +311,12 @@
         <text class="footer-text">没有更多了</text>
       </view>
       <view class="scroll-spacer" />
-    </scroll-view>
+      </scroll-view>
+    </view>
   </view>
 
-  <view v-else-if="authLoading" class="page page-loading" :style="pageRootStyle">
-    <text class="loading-text">校验权限中…</text>
+  <view v-else-if="showAuthLoading" class="page auth-page" :style="pageRootStyle">
+    <PageLoading :show="true" text="校验权限中…" />
   </view>
 </template>
 
@@ -456,6 +473,14 @@
 
     .empty-btn-hover {
       opacity: 0.9;
+    }
+
+    .scroll-wrap {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      display: flex;
+      flex-direction: column;
     }
 
     .scroll {

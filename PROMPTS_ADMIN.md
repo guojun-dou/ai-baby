@@ -614,3 +614,225 @@ cloudfunctions/
 - 类型定义
 
 不要省略代码
+
+---
+
+# 第七阶段：管理端统计数据
+
+## AI-Baby 补充管理端统计数据
+
+继续开发：
+
+管理端首页统计数据功能。
+
+页面：
+
+```text
+pages/admin/index/index.vue
+```
+
+项目已有：
+
+- 商品管理
+- 商品编辑
+- 订单管理
+- 订单详情
+- 管理员权限系统
+
+请在现有代码基础上开发。
+
+不要重构已有页面。
+
+### 功能目标
+
+首页展示实时统计数据：
+
+- 今日订单数
+- 待配送订单数
+- 商品总数
+
+统计数据来自云数据库。
+
+禁止使用 mock 数据。
+
+### 统计规则
+
+#### 今日订单数
+
+统计：
+
+orders
+
+集合中：
+
+createTime >= 今日00:00:00
+
+的订单数量。
+
+#### 待配送订单数
+
+统计：
+
+orders
+
+集合中：
+
+status = 2
+
+的订单数量。
+
+状态定义：
+
+- 0 待付款
+- 1 待制作
+- 2 配送中
+- 3 已完成
+- 4 已取消
+
+#### 商品总数
+
+统计：
+
+goods
+
+集合中：
+
+deleted = false
+
+的商品数量。
+
+### 点击跳转规则
+
+#### 今日订单数
+
+点击后：
+
+跳转：
+
+pages/admin/order/index
+
+自动筛选：
+
+今日订单
+
+#### 待配送订单数
+
+点击后：
+
+跳转：
+
+pages/admin/order/index
+
+自动筛选：
+
+status = 2
+
+### 商品总数
+
+点击后：
+
+跳转：
+
+pages/admin/goods/index
+
+展示全部商品。
+
+### 云函数
+
+新增：
+
+- cloudfunctions/
+  - admin-dashboard/
+    - index.js
+
+功能：
+
+获取首页统计数据。
+
+返回：
+
+```json
+{
+  "todayOrderCount": 0,
+  "deliveryCount": 0,
+  "goodsCount": 0
+}
+```
+
+要求：
+
+- 使用 wx-server-sdk
+- 校验管理员身份
+- 使用 async/await
+- 返回统一结构
+
+统一返回：
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {}
+}
+```
+
+### API
+
+新增：
+
+api/admin.ts
+
+封装：
+
+getDashboardData()
+
+要求：
+
+- 使用 wx.cloud.callFunction
+- 返回完整类型定义
+
+### 类型定义
+
+新增：
+
+types/admin.ts
+
+定义：
+
+```TypeScript
+export interface DashboardData {
+  todayOrderCount: number
+  deliveryCount: number
+  goodsCount: number
+}
+```
+
+禁止使用 any。
+
+### 页面要求
+
+首页进入时：
+
+自动加载统计数据。
+
+要求：
+
+- 显示 loading
+- 支持错误提示
+- 请求失败使用 uni.showToast
+- loading 正确关闭
+
+### 输出要求
+
+生成：
+
+- 云函数
+- API
+- 类型定义
+- 首页改造代码
+
+不要省略代码。
+
+不要伪代码。
+
+保证可以直接运行。

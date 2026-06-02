@@ -1,21 +1,27 @@
 <script setup lang="ts">
   import { onLoad } from '@dcloudio/uni-app'
-  import { reactive, ref } from 'vue'
+  import { computed, reactive, ref } from 'vue'
 
   import { getAdminGoodsDetail, saveGoods } from '@/api/goods'
   import AdminImagePicker from '@/components/AdminImagePicker/index.vue'
+  import PageLoading from '@/components/PageLoading/index.vue'
   import { useAdmin } from '@/composables/useAdmin'
+  import { usePageLoading } from '@/composables/usePageLoading'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
+  import { withUniLoading } from '@/utils/uni-loading'
 
   const CATEGORIES = ['米粉', '果泥', '面条', '粥品', '零食', '其他'] as const
 
   const { pageRootStyle } = usePageRootStyle()
   const { canAccess, loading: authLoading } = useAdmin()
+  const pageLoading = usePageLoading()
 
   const goodsId = ref('')
   const pageTitle = ref('新增商品')
-  const detailLoading = ref(false)
   const saving = ref(false)
+
+  const showAuthLoading = computed(() => authLoading.value && !canAccess.value)
+  const showDetailLoading = computed(() => pageLoading.loading.value)
 
   const form = reactive({
     title: '',
@@ -41,28 +47,28 @@
   }
 
   async function loadDetail(id: string) {
-    detailLoading.value = true
-    try {
-      const d = await getAdminGoodsDetail(id)
-      form.title = d.title
-      form.subtitle = d.subtitle ?? ''
-      form.price = String(d.price)
-      form.originalPrice = d.originalPrice != null ? String(d.originalPrice) : ''
-      form.stock = String(d.stock)
-      const catIdx = CATEGORIES.findIndex((c) => c === d.category)
-      form.categoryIndex = catIdx >= 0 ? catIdx : 0
-      form.age = d.age
-      form.tagsText = (d.tags ?? []).join('，')
-      form.desc = d.desc
-      form.status = d.status === 0 ? 0 : 1
-      form.sort = String(d.sort ?? 0)
-      imageFileIds.value = d.images.length > 0 ? [...d.images] : d.cover ? [d.cover] : []
-    } catch (e) {
-      console.error(e)
-      uni.showToast({ title: '加载商品失败', icon: 'none' })
-    } finally {
-      detailLoading.value = false
-    }
+    await pageLoading.run(async () => {
+      try {
+        const d = await getAdminGoodsDetail(id)
+        form.title = d.title
+        form.subtitle = d.subtitle ?? ''
+        form.price = String(d.price)
+        form.originalPrice = d.originalPrice != null ? String(d.originalPrice) : ''
+        form.stock = String(d.stock)
+        const catIdx = CATEGORIES.findIndex((c) => c === d.category)
+        form.categoryIndex = catIdx >= 0 ? catIdx : 0
+        form.age = d.age
+        form.tagsText = (d.tags ?? []).join('，')
+        form.desc = d.desc
+        form.status = d.status === 0 ? 0 : 1
+        form.sort = String(d.sort ?? 0)
+        imageFileIds.value = d.images.length > 0 ? [...d.images] : d.cover ? [d.cover] : []
+      }
+      catch (e) {
+        console.error(e)
+        uni.showToast({ title: '加载商品失败', icon: 'none' })
+      }
+    })
   }
 
   onLoad((options) => {
@@ -141,9 +147,8 @@
     }
 
     saving.value = true
-    uni.showLoading({ title: '保存中…', mask: true })
     try {
-      const res = await saveGoods(payload)
+      const res = await withUniLoading(() => saveGoods(payload), '保存中…')
       uni.showToast({ title: '保存成功', icon: 'success' })
       setTimeout(() => {
         if (!goodsId.value && res.goodsId) {
@@ -152,13 +157,14 @@
         }
         uni.navigateBack({ delta: 1 })
       }, 500)
-    } catch (e) {
+    }
+    catch (e) {
       console.error(e)
       const msg = e instanceof Error ? e.message : '保存失败'
       uni.showToast({ title: msg.length > 18 ? `${msg.slice(0, 15)}…` : msg, icon: 'none' })
-    } finally {
+    }
+    finally {
       saving.value = false
-      uni.hideLoading()
     }
   }
 </script>
@@ -169,9 +175,11 @@
       <text class="header-title">{{ pageTitle }}</text>
     </view>
 
-    <view v-if="detailLoading" class="loading-wrap">
-      <text class="loading-text">加载商品…</text>
-    </view>
+    <PageLoading
+      v-if="showDetailLoading"
+      :show="true"
+      text="加载商品…"
+    />
 
     <scroll-view v-else class="scroll" scroll-y :show-scrollbar="false">
       <view class="section">
@@ -294,15 +302,15 @@
       <view class="scroll-spacer" />
     </scroll-view>
 
-    <view v-if="!detailLoading" class="bottom-bar">
+    <view v-if="!showDetailLoading" class="bottom-bar">
       <view class="submit" hover-class="submit-hover" @tap="onSave">
         <text class="submit-text">{{ saving ? '保存中…' : '保存商品' }}</text>
       </view>
     </view>
   </view>
 
-  <view v-else-if="authLoading" class="page page-loading" :style="pageRootStyle">
-    <text class="loading-text">校验权限中…</text>
+  <view v-else-if="showAuthLoading" class="page auth-page" :style="pageRootStyle">
+    <PageLoading :show="true" text="校验权限中…" />
   </view>
 </template>
 

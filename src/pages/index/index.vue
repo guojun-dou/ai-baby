@@ -3,10 +3,12 @@
   import type { UserGoodsSortBy } from '@/types/user-goods'
   import { onPullDownRefresh } from '@dcloudio/uni-app'
 
-  import { ref } from 'vue'
+  import { computed, ref } from 'vue'
   import { getUserGoodsList } from '@/api/goods'
   import EmptyState from '@/components/EmptyState.vue'
   import GoodsCard from '@/components/GoodsCard.vue'
+  import PageLoading from '@/components/PageLoading/index.vue'
+  import { usePagedLoading } from '@/composables/usePageLoading'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
   import {
     fetchCloudTempUrlMap,
@@ -32,15 +34,21 @@
   ]
 
   const { pageRootStyle } = usePageRootStyle()
+  const { pageLoading, loadingMore, isCurrent, runReset, runMore } = usePagedLoading()
 
   const list = ref<GoodItem[]>([])
-  const loading = ref(true)
-  const loadingMore = ref(false)
   const hasMore = ref(false)
   const page = ref(1)
   const keyword = ref('')
   const searchInput = ref('')
   const sortIndex = ref(0)
+
+  const showInitialLoading = computed(
+    () => pageLoading.loading.value && list.value.length === 0,
+  )
+  const showRefreshOverlay = computed(
+    () => pageLoading.loading.value && list.value.length > 0,
+  )
 
   const listCoverUrlMap = ref<Record<string, string>>({})
 
@@ -73,49 +81,55 @@
     const silent = options?.silent === true
 
     if (reset) {
-      if (!silent) {
-        loading.value = true
-      }
-      page.value = 1
-      hasMore.value = false
-    } else {
-      if (loadingMore.value || !hasMore.value) {
-        return
-      }
-      loadingMore.value = true
+      await runReset(async (id) => {
+        page.value = 1
+        hasMore.value = false
+
+        try {
+          const sort = currentSort()
+          const data = await getUserGoodsList({
+            page: 1,
+            pageSize: PAGE_SIZE,
+            keyword: keyword.value,
+            sortBy: sort.value,
+            sortOrder: sort.order,
+          })
+
+          if (!isCurrent(id)) {
+            return
+          }
+
+          list.value = data.list
+          page.value = data.page
+          hasMore.value = data.hasMore
+          await syncListCoverUrls(list.value)
+        }
+        catch (e) {
+          console.error(e)
+          if (isCurrent(id)) {
+            list.value = []
+            listCoverUrlMap.value = {}
+          }
+        }
+      }, { silent, hasData: list.value.length > 0 })
+      return
     }
 
-    const sort = currentSort()
-    const nextPage = reset ? 1 : page.value + 1
-
-    try {
+    await runMore(async () => {
+      const sort = currentSort()
       const data = await getUserGoodsList({
-        page: nextPage,
+        page: page.value + 1,
         pageSize: PAGE_SIZE,
         keyword: keyword.value,
         sortBy: sort.value,
         sortOrder: sort.order,
       })
 
-      if (reset) {
-        list.value = data.list
-      } else {
-        list.value = [...list.value, ...data.list]
-      }
-
+      list.value = [...list.value, ...data.list]
       page.value = data.page
       hasMore.value = data.hasMore
       await syncListCoverUrls(list.value)
-    } catch (e) {
-      console.error(e)
-      if (reset) {
-        list.value = []
-        listCoverUrlMap.value = {}
-      }
-    } finally {
-      loading.value = false
-      loadingMore.value = false
-    }
+    }, () => hasMore.value && !pageLoading.busy.value)
   }
 
   function onSearch() {
@@ -186,9 +200,11 @@
       </picker>
     </view>
 
-    <view v-if="loading && !list.length" class="state">
-      <text class="state-text">正在加载好物…</text>
-    </view>
+    <PageLoading
+      v-if="showInitialLoading"
+      :show="true"
+      text="正在加载好物…"
+    />
 
     <view v-else-if="!list.length" class="home-empty">
       <EmptyState title="暂无商品" desc="换个关键词试试，或下拉刷新">
@@ -202,14 +218,20 @@
       </EmptyState>
     </view>
 
-    <scroll-view
-      v-else
-      class="scroll"
-      scroll-y
-      :show-scrollbar="false"
-      lower-threshold="120"
-      @scrolltolower="onScrollToLower"
-    >
+    <view v-else class="scroll-wrap">
+      <PageLoading
+        :show="showRefreshOverlay"
+        overlay
+        mask
+        text="刷新中…"
+      />
+      <scroll-view
+        class="scroll"
+        scroll-y
+        :show-scrollbar="false"
+        lower-threshold="120"
+        @scrolltolower="onScrollToLower"
+      >
       <view class="grid-wrap">
         <GoodsCard
           v-for="item in list"
@@ -229,7 +251,8 @@
         <text v-if="loadingMore" class="footer-text">加载中…</text>
         <text v-else-if="!hasMore" class="footer-text">— 已经到底啦 —</text>
       </view>
-    </scroll-view>
+      </scroll-view>
+    </view>
   </view>
 </template>
 
@@ -381,6 +404,14 @@
 
     .empty-slot-btn-hover {
       opacity: 0.9;
+    }
+
+    .scroll-wrap {
+      flex: 1;
+      height: 0;
+      position: relative;
+      display: flex;
+      flex-direction: column;
     }
 
     .scroll {

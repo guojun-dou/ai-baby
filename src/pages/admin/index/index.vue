@@ -1,8 +1,10 @@
 <script setup lang="ts">
   import { onPullDownRefresh, onShow } from '@dcloudio/uni-app'
-  import { ref } from 'vue'
+  import { computed, ref } from 'vue'
 
+  import PageLoading from '@/components/PageLoading/index.vue'
   import { useAdmin } from '@/composables/useAdmin'
+  import { usePageLoading } from '@/composables/usePageLoading'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
 
   /** 管理首页统计（后续由 admin 云函数替换） */
@@ -36,27 +38,28 @@
   ]
 
   const { pageRootStyle } = usePageRootStyle()
-  const { canAccess, adminName, loading } = useAdmin()
+  const { canAccess, adminName, loading: authLoading } = useAdmin()
+  const pageLoading = usePageLoading()
 
-  const statsLoading = ref(false)
   const stats = ref<AdminDashboardStats>({ ...MOCK_STATS })
+
+  const showAuthLoading = computed(() => authLoading.value && !canAccess.value)
+  const showStatsLoading = computed(() => pageLoading.loading.value)
 
   async function loadStats() {
     if (!canAccess.value) {
       return
     }
-    statsLoading.value = true
-    try {
-      // 后续接入云函数：await fetchAdminDashboardStats()
-      stats.value = { ...MOCK_STATS }
-    }
-    catch (e) {
-      console.error(e)
-      stats.value = { ...MOCK_STATS }
-    }
-    finally {
-      statsLoading.value = false
-    }
+    await pageLoading.run(async () => {
+      try {
+        // 后续接入云函数：await fetchAdminDashboardStats()
+        stats.value = { ...MOCK_STATS }
+      }
+      catch (e) {
+        console.error(e)
+        stats.value = { ...MOCK_STATS }
+      }
+    }, { silent: true })
   }
 
   onShow(() => {
@@ -93,21 +96,21 @@
         <view class="stat-icon-wrap">
           <uni-icons type="calendar" :size="22" color="#ff8ba7" />
         </view>
-        <text class="stat-num">{{ statsLoading ? '—' : stats.todayOrders }}</text>
+        <text class="stat-num">{{ showStatsLoading ? '—' : stats.todayOrders }}</text>
         <text class="stat-label">今日订单</text>
       </view>
       <view class="stat-card">
         <view class="stat-icon-wrap">
           <uni-icons type="paperplane" :size="22" color="#ff8ba7" />
         </view>
-        <text class="stat-num">{{ statsLoading ? '—' : stats.pendingDelivery }}</text>
+        <text class="stat-num">{{ showStatsLoading ? '—' : stats.pendingDelivery }}</text>
         <text class="stat-label">待配送</text>
       </view>
       <view class="stat-card">
         <view class="stat-icon-wrap">
           <uni-icons type="shop" :size="22" color="#ff8ba7" />
         </view>
-        <text class="stat-num">{{ statsLoading ? '—' : stats.goodsTotal }}</text>
+        <text class="stat-num">{{ showStatsLoading ? '—' : stats.goodsTotal }}</text>
         <text class="stat-label">商品总数</text>
       </view>
     </view>
@@ -141,8 +144,8 @@
     </view>
   </view>
 
-  <view v-else-if="loading" class="page page-loading" :style="pageRootStyle">
-    <text class="loading-text">校验权限中…</text>
+  <view v-else-if="showAuthLoading" class="page auth-page" :style="pageRootStyle">
+    <PageLoading :show="true" text="校验权限中…" />
   </view>
 </template>
 

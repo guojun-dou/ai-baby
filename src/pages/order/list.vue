@@ -6,6 +6,8 @@
   import { computed, ref, watch } from 'vue'
   import { getUserOrderList } from '@/api/order'
   import EmptyState from '@/components/EmptyState.vue'
+  import PageLoading from '@/components/PageLoading/index.vue'
+  import { usePagedLoading } from '@/composables/usePageLoading'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
   import {
     fetchCloudTempUrlMap,
@@ -25,13 +27,19 @@
   ]
 
   const { pageRootStyle } = usePageRootStyle()
+  const { pageLoading, loadingMore, isCurrent, runReset, runMore } = usePagedLoading()
 
   const orders = ref<UserOrderRecord[]>([])
-  const loading = ref(true)
-  const loadingMore = ref(false)
   const hasMore = ref(false)
   const page = ref(1)
   const activeTab = ref<UserOrderStatusFilter>('all')
+
+  const showInitialLoading = computed(
+    () => pageLoading.loading.value && orders.value.length === 0,
+  )
+  const showRefreshOverlay = computed(
+    () => pageLoading.loading.value && orders.value.length > 0,
+  )
 
   const orderCoverUrlMap = ref<Record<string, string>>({})
 
@@ -93,44 +101,46 @@
     const silent = options?.silent === true
 
     if (reset) {
-      if (!silent) {
-        loading.value = true
-      }
-      page.value = 1
-      hasMore.value = false
-    } else {
-      if (loadingMore.value || !hasMore.value) {
-        return
-      }
-      loadingMore.value = true
+      await runReset(async (id) => {
+        page.value = 1
+        hasMore.value = false
+
+        try {
+          const data = await getUserOrderList({
+            page: 1,
+            pageSize: PAGE_SIZE,
+            status: activeTab.value,
+          })
+
+          if (!isCurrent(id)) {
+            return
+          }
+
+          orders.value = data.list
+          page.value = data.page
+          hasMore.value = data.hasMore
+        }
+        catch (e) {
+          console.error(e)
+          if (isCurrent(id)) {
+            orders.value = []
+          }
+        }
+      }, { silent, hasData: orders.value.length > 0 })
+      return
     }
 
-    const nextPage = reset ? 1 : page.value + 1
-
-    try {
+    await runMore(async () => {
       const data = await getUserOrderList({
-        page: nextPage,
+        page: page.value + 1,
         pageSize: PAGE_SIZE,
         status: activeTab.value,
       })
 
-      if (reset) {
-        orders.value = data.list
-      } else {
-        orders.value = [...orders.value, ...data.list]
-      }
-
+      orders.value = [...orders.value, ...data.list]
       page.value = data.page
       hasMore.value = data.hasMore
-    } catch (e) {
-      console.error(e)
-      if (reset) {
-        orders.value = []
-      }
-    } finally {
-      loading.value = false
-      loadingMore.value = false
-    }
+    }, () => hasMore.value && !pageLoading.busy.value)
   }
 
   function onScrollToLower() {
@@ -143,7 +153,7 @@
     })
   })
 
-  const isEmpty = computed(() => !loading.value && orders.value.length === 0)
+  const isEmpty = computed(() => !pageLoading.loading.value && orders.value.length === 0)
 
   loadOrders({ reset: true })
 </script>
@@ -162,18 +172,26 @@
       </view>
     </view>
 
-    <view v-if="loading && !orders.length" class="state">
-      <text class="state-text">加载订单中…</text>
-    </view>
+    <PageLoading
+      v-if="showInitialLoading"
+      :show="true"
+      text="加载订单中…"
+    />
 
-    <scroll-view
-      v-else
-      class="scroll"
-      scroll-y
-      :show-scrollbar="false"
-      lower-threshold="120"
-      @scrolltolower="onScrollToLower"
-    >
+    <view v-else class="scroll-wrap">
+      <PageLoading
+        :show="showRefreshOverlay"
+        overlay
+        mask
+        text="刷新中…"
+      />
+      <scroll-view
+        class="scroll"
+        scroll-y
+        :show-scrollbar="false"
+        lower-threshold="120"
+        @scrolltolower="onScrollToLower"
+      >
       <EmptyState
         v-if="isEmpty"
         class="order-empty"
@@ -225,7 +243,8 @@
       </view>
 
       <view class="scroll-bottom" />
-    </scroll-view>
+      </scroll-view>
+    </view>
   </view>
 </template>
 
@@ -283,25 +302,33 @@
       }
     }
 
-    .state {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 80rpx;
+  .state {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80rpx;
 
-      .state-text {
-        font-size: 28rpx;
-        color: $text-secondary;
-      }
+    .state-text {
+      font-size: 28rpx;
+      color: $text-secondary;
     }
+  }
 
-    .scroll {
-      flex: 1;
-      height: 0;
-      padding: $card-gap $page-padding 0;
-      box-sizing: border-box;
-    }
+  .scroll-wrap {
+    flex: 1;
+    height: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .scroll {
+    flex: 1;
+    height: 0;
+    padding: $card-gap $page-padding 0;
+    box-sizing: border-box;
+  }
 
     .order-empty {
       min-height: 50vh;

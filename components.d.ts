@@ -13,6 +13,7 @@ declare module 'vue' {
     EmptyState: typeof import('./src/components/EmptyState.vue')['default']
     GoodsCard: typeof import('./src/components/GoodsCard.vue')['default']
     InputEntry: typeof import('./src/components/InputEntry.vue')['default']
+    PageLoading: typeof import('./src/components/PageLoading/index.vue')['default']
     SubmitBar: typeof import('./src/components/SubmitBar.vue')['default']
   }
 }

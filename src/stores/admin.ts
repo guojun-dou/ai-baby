@@ -31,11 +31,11 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
+  let fetchRefCount = 0
+
   /** 调用 admin-check 云函数并更新状态 */
   async function fetchAdminStatus(): Promise<boolean> {
-    if (loading.value) {
-      return isAdmin.value
-    }
+    fetchRefCount++
     loading.value = true
     try {
       const data = await checkAdmin()
@@ -52,8 +52,9 @@ export const useAdminStore = defineStore('admin', () => {
       return false
     }
     finally {
+      fetchRefCount = Math.max(0, fetchRefCount - 1)
       checked.value = true
-      loading.value = false
+      loading.value = fetchRefCount > 0
     }
   }
 

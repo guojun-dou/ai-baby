@@ -1,11 +1,13 @@
 <script setup lang="ts">
   import type { AdminOrderListItem, AdminOrderStatusFilter } from '@/types/order-admin'
   import { onPullDownRefresh } from '@dcloudio/uni-app'
-  import { ref, watch } from 'vue'
+  import { computed, ref, watch } from 'vue'
 
   import { getAdminOrderList } from '@/api/order'
   import EmptyState from '@/components/EmptyState.vue'
+  import PageLoading from '@/components/PageLoading/index.vue'
   import { useAdmin } from '@/composables/useAdmin'
+  import { usePagedLoading } from '@/composables/usePageLoading'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
   import {
     ADMIN_ORDER_STATUS_COLOR,
@@ -25,14 +27,21 @@
 
   const { pageRootStyle } = usePageRootStyle()
   const { canAccess, loading: authLoading } = useAdmin()
+  const { pageLoading, loadingMore, isCurrent, runReset, runMore } = usePagedLoading()
 
   const activeTab = ref<AdminOrderStatusFilter>('all')
   const list = ref<AdminOrderListItem[]>([])
   const page = ref(1)
   const hasMore = ref(true)
-  const loading = ref(false)
-  const loadingMore = ref(false)
   const loadError = ref('')
+
+  const showInitialLoading = computed(
+    () => pageLoading.loading.value && list.value.length === 0,
+  )
+  const showRefreshOverlay = computed(
+    () => pageLoading.loading.value && list.value.length > 0,
+  )
+  const showAuthLoading = computed(() => authLoading.value && !canAccess.value)
 
   function formatPrice(price: number) {
     return `¥${price.toFixed(2)}`
@@ -70,61 +79,60 @@
     return `${s.slice(0, 8)}…${s.slice(-4)}`
   }
 
-  async function fetchPage(reset: boolean) {
+  async function fetchPage(reset: boolean, opts?: { silent?: boolean }) {
     if (!canAccess.value) {
       return
     }
+
     if (reset) {
-      if (loading.value) {
-        return
-      }
-      loading.value = true
-      page.value = 1
-      hasMore.value = true
-      loadError.value = ''
-    }
-    else {
-      if (loadingMore.value || loading.value || !hasMore.value) {
-        return
-      }
-      loadingMore.value = true
+      await runReset(async (id) => {
+        page.value = 1
+        hasMore.value = true
+        loadError.value = ''
+
+        try {
+          const data = await getAdminOrderList({
+            page: 1,
+            pageSize: PAGE_SIZE,
+            status: activeTab.value,
+          })
+
+          if (!isCurrent(id)) {
+            return
+          }
+
+          list.value = data.list
+          page.value = data.page
+          hasMore.value = data.hasMore
+        }
+        catch (e) {
+          console.error(e)
+          if (isCurrent(id)) {
+            loadError.value = '加载失败，请下拉重试'
+            list.value = []
+          }
+        }
+      }, { silent: opts?.silent, hasData: list.value.length > 0 })
+      return
     }
 
-    try {
-      const nextPage = reset ? 1 : page.value + 1
+    await runMore(async () => {
       const data = await getAdminOrderList({
-        page: nextPage,
+        page: page.value + 1,
         pageSize: PAGE_SIZE,
         status: activeTab.value,
       })
 
-      if (reset) {
-        list.value = data.list
-      }
-      else {
-        list.value = [...list.value, ...data.list]
-      }
-
+      list.value = [...list.value, ...data.list]
       page.value = data.page
       hasMore.value = data.hasMore
-    }
-    catch (e) {
-      console.error(e)
-      loadError.value = '加载失败，请下拉重试'
-      if (reset) {
-        list.value = []
-      }
-    }
-    finally {
-      loading.value = false
-      loadingMore.value = false
-    }
+    }, () => hasMore.value && !pageLoading.busy.value)
   }
 
   watch(
     canAccess,
     (val) => {
-      if (val && list.value.length === 0 && !loading.value) {
+      if (val && list.value.length === 0) {
         void fetchPage(true)
       }
     },
@@ -132,7 +140,7 @@
   )
 
   onPullDownRefresh(() => {
-    void fetchPage(true).finally(() => {
+    void fetchPage(true, { silent: list.value.length > 0 }).finally(() => {
       uni.stopPullDownRefresh()
     })
   })
@@ -177,9 +185,11 @@
       </view>
     </scroll-view>
 
-    <view v-if="loading && !list.length" class="state">
-      <text class="state-text">加载中…</text>
-    </view>
+    <PageLoading
+      v-if="showInitialLoading"
+      :show="true"
+      text="加载中…"
+    />
 
     <view v-else-if="loadError && !list.length" class="state">
       <text class="state-text">{{ loadError }}</text>
@@ -192,13 +202,19 @@
       <EmptyState title="暂无订单" desc="切换筛选或稍后再来看看" />
     </view>
 
-    <scroll-view
-      v-else
-      class="scroll"
-      scroll-y
-      :show-scrollbar="false"
-      @scrolltolower="onLoadMore"
-    >
+    <view v-else class="scroll-wrap">
+      <PageLoading
+        :show="showRefreshOverlay"
+        overlay
+        mask
+        text="刷新中…"
+      />
+      <scroll-view
+        class="scroll"
+        scroll-y
+        :show-scrollbar="false"
+        @scrolltolower="onLoadMore"
+      >
       <view
         v-for="item in list"
         :key="item._id"
@@ -237,11 +253,12 @@
         <text class="footer-text">没有更多了</text>
       </view>
       <view class="scroll-spacer" />
-    </scroll-view>
+      </scroll-view>
+    </view>
   </view>
 
-  <view v-else-if="authLoading" class="page page-loading" :style="pageRootStyle">
-    <text class="loading-text">校验权限中…</text>
+  <view v-else-if="showAuthLoading" class="page auth-page" :style="pageRootStyle">
+    <PageLoading :show="true" text="校验权限中…" />
   </view>
 </template>
 
@@ -337,6 +354,14 @@
     .empty-wrap {
       flex: 1;
       padding: 40rpx $page-padding;
+    }
+
+    .scroll-wrap {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      display: flex;
+      flex-direction: column;
     }
 
     .scroll {

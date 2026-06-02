@@ -4,15 +4,18 @@
 
   import { computed, ref, watch } from 'vue'
   import { getUserGoodsDetail } from '@/api/goods'
+  import PageLoading from '@/components/PageLoading/index.vue'
+  import { usePageLoading } from '@/composables/usePageLoading'
   import { usePageRootStyle } from '@/composables/usePageRootStyle'
   import { useCartStore } from '@/stores/cart'
   import { toDisplayImageUrls } from '@/utils/cloud-file'
   import { getDetailAgeLabel, getDetailImageList, getGoodsCover, getGoodsTitle, isGoodsPurchasable } from '@/utils/goods-fields'
 
   const { pageRootStyle } = usePageRootStyle()
+  const pageLoading = usePageLoading()
+  const showLoading = computed(() => pageLoading.loading.value)
 
   const detail = ref<GoodDetail | null>(null)
-  const loading = ref(true)
   const loadError = ref('')
 
   const goodsId = ref('')
@@ -88,24 +91,21 @@
 
   async function loadDetail(id: string) {
     if (!id) {
-      loading.value = false
       loadError.value = '缺少商品 id'
       return
     }
-    loading.value = true
     loadError.value = ''
-    try {
-      const data = await getUserGoodsDetail(id)
-      detail.value = data
-    }
-    catch (e) {
-      console.error(e)
-      detail.value = null
-      loadError.value = e instanceof Error ? e.message : '商品不存在或已下架'
-    }
-    finally {
-      loading.value = false
-    }
+    await pageLoading.run(async () => {
+      try {
+        const data = await getUserGoodsDetail(id)
+        detail.value = data
+      }
+      catch (e) {
+        console.error(e)
+        detail.value = null
+        loadError.value = e instanceof Error ? e.message : '商品不存在或已下架'
+      }
+    })
   }
 
   const cartStore = useCartStore()
@@ -165,15 +165,13 @@
 
 <template>
   <view class="page" :style="pageRootStyle">
-    <view v-if="loading" class="state">
-      <text class="state-text">加载中…</text>
-    </view>
+    <PageLoading :show="showLoading" text="加载中…" />
 
-    <view v-else-if="!detail" class="state">
+    <view v-if="!showLoading && !detail" class="state">
       <text class="state-text">{{ loadError || '商品不存在或已下架' }}</text>
     </view>
 
-    <scroll-view v-else class="scroll" scroll-y :enhanced="true" :show-scrollbar="false">
+    <scroll-view v-else-if="detail" class="scroll" scroll-y :enhanced="true" :show-scrollbar="false">
       <view class="swiper-wrap">
         <swiper
           v-if="swiperDisplayUrls.length > 0"
